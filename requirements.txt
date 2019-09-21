@@ -3,7 +3,7 @@ astor==0.8.0
 gast==0.3.2
 google-pasta==0.1.7
 grpcio==1.23.0
-h5py==2.10.0
+h5py
 Keras==2.2.5
 Keras-Applications==1.0.8
 Keras-Preprocessing==1.1.0

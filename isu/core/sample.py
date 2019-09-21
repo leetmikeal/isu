@@ -10,10 +10,9 @@ from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from tqdm import tqdm
 
 class Sample():
-    def __init__(self, dir_path, cache_image, color_space, verbose):
+    def __init__(self, dir_path, cache_image, verbose):
         self.dir_path = dir_path
         self.cache_image = cache_image
-        self.color_space = color_space
         self.class_num = 0
         self.width = 0
         self.height = 0
@@ -77,45 +76,65 @@ class Sample():
 
         Returns:
             image_list: image list by numpy array
-            class_list: class list by numpy array
+            label_list: class list by numpy array
         """
         def get_class_name(path):
             dirname = os.path.basename(os.path.dirname(path))
             return dirname
 
         image_list = []
-        class_list = []
-        for path in tqdm(
-            glob.iglob(
-                os.path.join(
-                    dir_path,
-                    '*',
-                    '*.png')),
-            disable=(
-                not self.verbose)):
-            img = self.__load_single_image_from_file(path)
-            class_num = int(get_class_name(path))
+        label_list = []
+        for dataset_path in glob.iglob(os.path.join(dir_path, 'input', '*')):
+            boxcell = []
+            labelcell = []
+            for path in tqdm(
+                glob.iglob(
+                    os.path.join(
+                        dataset_path,
+                        '*.tif')),
+                disable=(
+                    not self.verbose)):
 
-            class_list.append(class_num)
-            image_list.append(img)
+                img = self.__load_single_image_from_file(path)
+                boxcell.append(img)
 
-        image_list = np.array(image_list, dtype=np.float16) / 255.0
-        class_list = np.array(class_list, dtype=np.uint8)
+            boxcell = np.concatenate(boxcell, axis=2)
+            boxcell = np.array(boxcell, dtype=np.float16) / 255.0
 
-        return image_list, class_list
+            label_path = os.path.join(dir_path, 'label', os.path.basename(dataset_path))
+            for path in tqdm(
+                glob.iglob(
+                    os.path.join(
+                        label_path,
+                        '*.tif')),
+                disable=(
+                    not self.verbose)):
+
+                label = self.__load_single_class_from_file(path)
+
+                labelcell.append(label)
+            labelcell = np.concatenate(labelcell, axis=2)
+            labelcell = np.array(labelcell, dtype=np.float16) / 255.0
+
+            image_list.append(boxcell)
+            label_list.append(labelcell)
+
+        return image_list, label_list
 
     def __load_single_image_from_file(self, path):
-        if self.color_space == 'gray':
-            img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
-        elif self.color_space == 'rgb':
-            img = cv2.imread(path, cv2.IMREAD_COLOR)
-        else:
-            raise ValueError('unknown color space : {}'.format(self.color_space))
+        img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
-        if len(img.shape) == 2:  # gray
-            img = img.reshape(img.shape[0], img.shape[1], 1)
+        img = img.reshape((img.shape[0], img.shape[1], 1))
 
         return img
+
+    def __load_single_class_from_file(self, path):
+        img = cv2.imread(path, cv2.IMREAD_COLOR)
+        b, g, r = cv2.split(img)
+
+        r = r.reshape((r.shape[0], r.shape[1], 1))
+
+        return r
 
     def split(self, train_count, val_count, val_biased=False):
         if val_biased:

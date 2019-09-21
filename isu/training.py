@@ -56,10 +56,6 @@ def setup_argument_parser(parser):
         type=int,
         default=10000)
     parser.add_argument(
-        '--sample-color',
-        help='sample image color space [gray, rgb]',
-        default='rgb')
-    parser.add_argument(
         '--lr-init',
         help='initial learning rate',
         type=float,
@@ -99,7 +95,6 @@ def training(
     sample_init, 
     sample_step, 
     sample_val, 
-    sample_color,
     lr_init,
     lr_step,
     lr_epochs,
@@ -116,7 +111,6 @@ def training(
         sample_init (int): number of initial training sample
         sample_step (int): number of addition training sample
         sample_val (int): number of validation image
-        sample_color (string): sample image color space [gray, rgb]
         lr_init (float): learning rate initial value
         lr_step (float): learning rate changing value
         lr_epochs (int): number of epoch to keep learning rate value
@@ -127,7 +121,6 @@ def training(
     sample = Sample(
         dir_path=sample_dir, 
         cache_image=cache_image, 
-        color_space=sample_color,
         verbose=verbose)
     sample.load()
 
@@ -192,7 +185,6 @@ def main(args):
         sample_init=args.sample_init,
         sample_step=args.sample_step,
         sample_val=args.sample_val,
-        sample_color=args.sample_color,
         lr_init=args.lr_init,
         lr_step=args.lr_step,
         lr_epochs=args.lr_epochs,

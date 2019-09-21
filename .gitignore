@@ -5,6 +5,6 @@ work/
 .env
 build/
 dist/
-icals.egg-info/
+*.egg-info/
 .python-version
 
