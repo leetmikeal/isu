@@ -12,23 +12,21 @@ sys.path.insert(0, mydir)
 from utility.save import check_dir
 
 class Model():
-    def __init__(self, application, input_shape, class_num, epochs, batch_size, lr, verbose=False):
+    def __init__(self, application, input_shape, epochs, batch_size, lr, verbose=False):
         self.application = application
         self.input_shape = input_shape
-        self.class_num = class_num
         self.epochs = epochs
         self.batch_size = batch_size
         self.lr = lr
         self.verbose = verbose
 
         self.__create_model()
-        self.__set_optimizer()
+        # self.__set_optimizer()
 
     def __create_model(self):
         """create model
         
         Args:
-            class_num (int): output class number
             verbose (bool): output debug information
         
         Returns:
@@ -36,15 +34,25 @@ class Model():
         """
         if self.verbose:
             print('input image size: {}'.format(self.input_shape))
-        from model.main import generate_model_base
-        model = generate_model_base(
-            preset=self.application,
-            width=self.input_shape[0],
-            height=self.input_shape[1],
-            channel=self.input_shape[2],
-            class_num=self.class_num,
-            weights_init=None
-        )
+        # from model.main import generate_model_base
+        # model = generate_model_base(
+        #     preset=self.application,
+        #     width=self.input_shape[0],
+        #     height=self.input_shape[1],
+        #     channel=self.input_shape[2],
+        #     weights_init=None
+        # )
+        from model.unet import unet_model_3d
+        # model = unet_model_3d(
+        #     self.input_shape, 
+        #     depth=3, 
+        #     n_base_filters=8, 
+        #     initial_learning_rate=self.lr.init)
+        model = unet_model_3d(
+            self.input_shape, 
+            depth=2, 
+            n_base_filters=4, 
+            initial_learning_rate=self.lr.init)
 
         if self.verbose:
             model.summary()
@@ -72,7 +80,7 @@ class Model():
         # set callback
         callbacks = self.__callbacks(out_dir)
         
-        class_train, class_val = sample.get_one_hot()
+        # class_train, class_val = sample.get_one_hot()
 
         # self.model.fit(
         #     sample.image_train,
@@ -81,16 +89,24 @@ class Model():
         # )
         from model_action import train as model_train
 
-        model_train(
-            self.model,
-            sample.image_train,
-            sample.image_val,
-            class_train,
-            class_val,
-            self.epochs,
-            self.batch_size,
-            callbacks=callbacks
-        )
+        self.model.fit(
+            x=sample.image_train,
+            y=sample.class_train,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            shuffle=True,
+            validation_data=(sample.image_val, sample.class_val),
+            callbacks=callbacks)
+        # model_train(
+        #     self.model,
+        #     sample.image_train,
+        #     sample.image_val,
+        #     sample.class_train,
+        #     sample.class_val,
+        #     self.epochs,
+        #     self.batch_size,
+        #     callbacks=callbacks
+        # )
 
     def predict(self, image_unlabeled, out_dir):
 

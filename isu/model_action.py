@@ -89,15 +89,14 @@ def train(
             callbacks.on_batch_begin(j, {})
 
             # main process
-            loss_and_acc = model.train_on_batch(
+            loss = model.train_on_batch(
                 x=image_batch,
                 y=label_batch,
                 class_weight=class_weight)
 
             # result
             num_image = image_batch.shape[0]
-            loss_sum += loss_and_acc[0] * num_image
-            acc_sum += loss_and_acc[1] * num_image
+            loss_sum += loss * num_image
 
             # TODO: 2nd arguments 'batch_logs' must be implemented
             callbacks.on_batch_end(j, {})
@@ -113,36 +112,30 @@ def train(
             #                                             )
         num_image_total = image_training.shape[0]
         train_loss = loss_sum / num_image_total
-        train_acc = acc_sum / num_image_total
 
         # Validation after batch loop
         loss_sum = 0.0
-        acc_sum = 0.0
         validate_generator = tqdm(
             iterable=iter_train_batch(image_validation, label_validation, batch_size), 
             total=math.ceil(image_validation.shape[0] / batch_size))
         for j, [image_batch, label_batch] in enumerate(validate_generator):
 
             # main process
-            loss_and_acc = model.test_on_batch(x=image_batch, y=label_batch)
+            loss = model.test_on_batch(x=image_batch, y=label_batch)
 
             # result
             num_image = image_batch.shape[0]
-            loss_sum += loss_and_acc[0] * num_image
-            acc_sum += loss_and_acc[1] * num_image
+            loss_sum += loss * num_image
 
         num_image_total = image_validation.shape[0]
         val_loss = loss_sum / num_image_total
-        val_acc = acc_sum / num_image_total
         # print_batch_end_time_training_validation(val_loss=val_loss, val_acc=val_acc)
         # all batches end
         # print_all_batch_end_time_training_validation(time_start_batch=time_start_batch)
 
         epoch_logs = {
-            'train_loss': train_loss,
-            'train_acc': train_acc,
+            'loss': train_loss,
             'val_loss': val_loss,
-            'val_acc': val_acc
         }
         callbacks.on_epoch_end(i, epoch_logs)
 

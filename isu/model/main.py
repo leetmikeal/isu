@@ -148,32 +148,34 @@ def insert_intermediate_layer_in_keras(model, layer_id, new_layer):
 
 def create_bench_model(inputs):
     from keras.models import Model
-    from keras.layers import Input, Conv2D, BatchNormalization, MaxPool2D, GlobalAveragePooling2D, Dense
+    from keras.layers import Input, Conv3D, BatchNormalization, MaxPool2D, GlobalAveragePooling2D, Dense
 
-    x = Conv2D(64,(3,3),padding = "SAME",activation= "relu")(inputs)
-    x = Conv2D(64,(3,3),padding = "SAME",activation= "relu")(x)
+    x = Conv3D(4,(3,3,3),padding = "SAME",activation= "relu")(inputs)
+    # x = Conv3D(4,(3,3,3),padding = "SAME",activation= "relu")(x)
     x = BatchNormalization(axis=3, epsilon=1.001e-5,
                                     name='conv1_bn')(x)
-    x = MaxPool2D()(x)
+    # x = MaxPool3D()(x)
 
-    x = Conv2D(128,(3,3),padding = "SAME",activation= "relu")(x)
-    x = Conv2D(128,(3,3),padding = "SAME",activation= "relu")(x)
+    x = Conv3D(4,(3,3,3),padding = "SAME",activation= "relu")(x)
+    # x = Conv3D(8,(3,3,3),padding = "SAME",activation= "relu")(x)
     x = BatchNormalization(axis=3, epsilon=1.001e-5,
                                     name='conv2_bn')(x)
-    x = MaxPool2D()(x)
 
-    x = Conv2D(256,(3,3),padding = "SAME",activation= "relu")(x)
-    x = Conv2D(256,(3,3),padding = "SAME",activation= "relu")(x)
-    x = GlobalAveragePooling2D()(x)
+    x = Conv3D(1,(3,3,3),padding = "SAME",activation= "relu")(x)
+    # x = MaxPool2D()(x)
 
-    x = Dense(1024,activation = "relu")(x)
+    # x = Conv2D(256,(3,3),padding = "SAME",activation= "relu")(x)
+    # x = Conv2D(256,(3,3),padding = "SAME",activation= "relu")(x)
+    # x = GlobalAveragePooling2D()(x)
+
+    # x = Dense(1024,activation = "relu")(x)
     # x = Dropout(0.25)(x)
     # y = Dense(10,activation = "softmax")(x)
 
     return Model(input = inputs, output = x)
 
 
-def generate_model_base(preset, width, height, channel, class_num, weights_init):
+def generate_model_base(preset, width, height, channel, weights_init):
     '''
     モデルを作成する
 
@@ -202,12 +204,7 @@ def generate_model_base(preset, width, height, channel, class_num, weights_init)
 
     if preset.upper() == "bench".upper():
         conv_base = create_bench_model(input_tensor)
-        output_layer = conv_base.layers[-1]
-        x = output_layer.get_output_at(-1)  # x = output_layer.output
-        x = BatchNormalization(name='fc_bachnorm')(x)
-        # x = Dropout(0.2, name='fc_dropout')(x)
-        prediction_layer = Dense(class_num, activation='softmax',
-                                 kernel_initializer='glorot_uniform', name='prediction')(x)
+        prediction_layer = conv_base
     elif preset.upper() == "VGG16".upper():
         from keras.applications import VGG16
         conv_base = None

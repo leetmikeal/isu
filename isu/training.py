@@ -44,17 +44,12 @@ def setup_argument_parser(parser):
         '--sample-init',
         help='initial number of image sample',
         type=int,
-        default=10000)
-    parser.add_argument(
-        '--sample-step',
-        help='step number of adding image sample',
-        type=int,
-        default=10000)
+        default=400)
     parser.add_argument(
         '--sample-val',
         help='number of validation image sample',
         type=int,
-        default=10000)
+        default=100)
     parser.add_argument(
         '--lr-init',
         help='initial learning rate',
@@ -91,9 +86,7 @@ def training(
     cache_image, 
     epochs, 
     batch_size, 
-    sample_add, 
     sample_init, 
-    sample_step, 
     sample_val, 
     lr_init,
     lr_step,
@@ -107,9 +100,7 @@ def training(
         cache_imgae (string): cache image directry path
         epochs (int): number of epoch
         bach_size (int): image batch size per epoch
-        sample_add (string): sample addition method [random, confident, unconfident, entropy]
         sample_init (int): number of initial training sample
-        sample_step (int): number of addition training sample
         sample_val (int): number of validation image
         lr_init (float): learning rate initial value
         lr_step (float): learning rate changing value
@@ -121,55 +112,46 @@ def training(
     sample = Sample(
         dir_path=sample_dir, 
         cache_image=cache_image, 
+        crop_size=(64, 64, 64),
+        data_count=sample_init + sample_val,
         verbose=verbose)
     sample.load()
 
     # split data
     sample.split(
         train_count=sample_init,
-        val_count=sample_val
+        val_count=sample_val,
+        val_biased=True
     )
 
-    count = 0
-    while (True):
-        if verbose:
-            print('iteration : {}'.format(count))
+    if not os.path.exists(out_dir):
+        os.makedirs(out_dir)
 
-        ann_out_dir = os.path.join(out_dir, '{:02d}'.format(count))
-        if not os.path.exists(ann_out_dir):
-            os.makedirs(ann_out_dir)
+    # learning rate
+    lr = LearningRateSchedulerConf(
+        init=lr_init,
+        epoch=lr_epochs,
+        step=lr_step
+    )
 
-        # learning rate
-        lr = LearningRateSchedulerConf(
-            init=lr_init,
-            epoch=lr_epochs,
-            step=lr_step
+    # create model
+    model = Model(
+        application='bench',
+        # application='resnet20',
+        # application='resnet50',
+        input_shape=sample.input_shape(),
+        epochs=epochs,
+        batch_size=batch_size,
+        lr=lr,
+        verbose=verbose
         )
 
-        # create model
-        model = Model(
-            application='bench',
-            # application='resnet20',
-            # application='resnet50',
-            input_shape=sample.input_shape(),
-            class_num=sample.class_num,
-            epochs=epochs,
-            batch_size=batch_size,
-            lr=lr,
-            verbose=verbose
-            )
+    # training
+    model.train(sample, out_dir)
 
-        # training
-        model.train(sample, ann_out_dir)
+    # save model
+    model.save(out_dir)
 
-        # save model
-        model.save(ann_out_dir)
-
-        if (sample.image_unlabeled is None or sample.image_unlabeled.shape[0] == 0):
-            break
-
-        sample.append_train(sample_add, sample_step, ann_out_dir, model)
-        count += 1
 
     print('completed!')
 
@@ -181,9 +163,7 @@ def main(args):
         cache_image=args.cache_image,
         epochs=args.epochs,
         batch_size=args.batch_size,
-        sample_add=args.sample_add,
         sample_init=args.sample_init,
-        sample_step=args.sample_step,
         sample_val=args.sample_val,
         lr_init=args.lr_init,
         lr_step=args.lr_step,

@@ -10,10 +10,11 @@ from sklearn.model_selection import train_test_split, StratifiedShuffleSplit
 from tqdm import tqdm
 
 class Sample():
-    def __init__(self, dir_path, cache_image, verbose):
+    def __init__(self, dir_path, cache_image, crop_size, data_count, verbose):
         self.dir_path = dir_path
         self.cache_image = cache_image
-        self.class_num = 0
+        self.crop_size = crop_size
+        self.data_count = data_count
         self.width = 0
         self.height = 0
         self.channel = 0
@@ -29,21 +30,18 @@ class Sample():
                     class_cache_path):
                 image_list = np.load(image_cache_path, allow_pickle=False)
                 class_list = np.load(class_cache_path, allow_pickle=False)
-                if self.verbose:
-                    print('!! cached !!')
-                    print('loaded image : {}'.format(image_list.shape))
-                    print('loaded class : {}'.format(class_list.shape))
 
                 self.image_list = image_list
                 self.class_list = class_list
                 self.__set_attributes()
+
+                if self.verbose:
+                    self.debug_print()
+                    
                 return
 
-        image_list, class_list = self.__load_image(self.dir_path)
-
-        if self.verbose:
-            print('loaded image : {}'.format(image_list.shape))
-            print('loaded class : {}'.format(class_list.shape))
+        image_raw_list, class_raw_list = self.__load_image(self.dir_path)
+        image_list, class_list = self.__crop_image(image_raw_list, class_raw_list, self.data_count, self.crop_size)
 
         if self.cache_image is not None and os.path.exists(self.cache_image):
             image_cache_path, class_cache_path = self.__get_cache_file_path()
@@ -54,9 +52,17 @@ class Sample():
         self.class_list = class_list
         self.__set_attributes()
 
+        if self.verbose:
+            self.debug_print()
+
+    def debug_print(self):
+        for idx, [i, c] in enumerate(zip(self.image_list, self.class_list)):
+            print('loaded {} image : {}'.format(idx, i.shape))
+            print('loaded {} class : {}'.format(idx, c.shape))
+
+
 
     def __set_attributes(self):
-        self.class_num = self.class_list.max() + 1 # TODO: have to calculate kind of class number
         self.width = self.image_list.shape[1]
         self.height = self.image_list.shape[2]
         self.channel = self.image_list.shape[3]
@@ -121,10 +127,38 @@ class Sample():
 
         return image_list, label_list
 
+
+    def __crop_image(self, image_raw_list, class_raw_list, count, size):
+        if self.verbose:
+            print('cropping image')
+
+        raw_count = len(image_raw_list)
+        image_index_list = np.random.randint(0, raw_count, count)
+
+        crop_image_list = []
+        crop_class_list = []
+        for idx in tqdm(image_index_list, disable=(not self.verbose)):
+            image = image_raw_list[idx]
+            cl = class_raw_list[idx]
+
+            range_x = np.random.randint(0, image.shape[0] - size[0])
+            range_y = np.random.randint(0, image.shape[1] - size[1])
+            range_z = np.random.randint(0, image.shape[2] - size[2])
+
+            crop_image = image[range_x:range_x+size[0], range_y:range_y+size[1], range_z:range_z+size[2], :]
+            crop_class = cl[range_x:range_x+size[0], range_y:range_y+size[1], range_z:range_z+size[2], :]
+
+            crop_image_list.append(crop_image)
+            crop_class_list.append(crop_class)
+
+        return np.array(crop_image_list), np.array(crop_class_list)
+
+        
+
     def __load_single_image_from_file(self, path):
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
 
-        img = img.reshape((img.shape[0], img.shape[1], 1))
+        img = img.reshape((img.shape[0], img.shape[1], 1, 1))
 
         return img
 
@@ -132,26 +166,20 @@ class Sample():
         img = cv2.imread(path, cv2.IMREAD_COLOR)
         b, g, r = cv2.split(img)
 
-        r = r.reshape((r.shape[0], r.shape[1], 1))
+        r = r.reshape((r.shape[0], r.shape[1], 1, 1))
 
         return r
 
     def split(self, train_count, val_count, val_biased=False):
         if val_biased:
-            image_sample, image_val, class_sample, class_val = train_test_split(
+            image_train, image_val, class_train, class_val = train_test_split(
                 self.image_list, self.class_list, test_size=val_count, shuffle=True
             )
             self.image_val = image_val
             self.class_val = class_val
 
-            unlabeled_count = image_sample.shape[0] - train_count
-            image_train, image_unlabeled, class_train, class_unlabeled = train_test_split(
-                image_sample, class_sample, test_size=unlabeled_count, shuffle=True)
-
             self.image_train = image_train
             self.class_train = class_train
-            self.image_unlabeled = image_unlabeled
-            self.class_unlabeled = class_unlabeled
 
         else:
             stratSplit = StratifiedShuffleSplit(n_splits=1, test_size=val_count)
@@ -161,120 +189,15 @@ class Sample():
                 self.image_val = self.image_list[val_idxs]
                 self.class_val = self.class_list[val_idxs]
 
-            unlabeled_count = image_sample.shape[0] - train_count
-            stratSplit = StratifiedShuffleSplit(n_splits=1, test_size=unlabeled_count)
-            for train_idxs, unlabeled_idxs in stratSplit.split(image_sample, class_sample):
-                self.image_train = image_sample[train_idxs]
-                self.class_train = class_sample[train_idxs]
-                self.image_unlabeled = image_sample[unlabeled_idxs]
-                self.class_unlabeled = class_sample[unlabeled_idxs]
+            self.image_train = image_sample
+            self.class_train = class_sample
 
         if self.verbose:
             print('training : {}'.format(self.image_train.shape))
             print('validation : {}'.format(self.image_val.shape))
-            print('unlabeled : {}'.format(self.image_unlabeled.shape))
 
-
-    def append_train(self, add_type, append_train_count, out_dir='', model=None):
-        if self.image_unlabeled is None:
-            print('warning: unlabeled is None')
-            return
-        unlabeled_count = self.image_unlabeled.shape[0] - append_train_count
-        
-        if unlabeled_count >= 1:
-            if add_type == 'random':
-                self.__append_train_random(unlabeled_count)
-            elif add_type == 'confident':
-                self.__append_train_confident(append_train_count, out_dir, model)
-            elif add_type == 'unconfident':
-                self.__append_train_unconfident(append_train_count, out_dir, model)
-            elif add_type == 'entropy':
-                raise ValueError('not implemented addition type : {}'.format(add_type))
-            else:
-                raise ValueError('not implemented addition type : {}'.format(add_type))
-        else:
-            self.image_train = np.concatenate([self.image_train, self.image_unlabeled], axis=0)
-            self.class_train = np.concatenate([self.class_train, self.class_unlabeled], axis=0)
-
-            self.image_unlabeled = None
-            self.class_unlabeled = None
-
-        p = np.random.permutation(self.image_train.shape[0])
-        self.image_train = self.image_train[p]
-        self.class_train = self.class_train[p]
-        
-        if self.verbose:
-            print('training : {}'.format(self.image_train.shape))
-            print('validation : {}'.format(self.image_val.shape))
-            if self.image_unlabeled is None:
-                print('unlabeled : is None')
-            else:
-                print('unlabeled : {}'.format(self.image_unlabeled.shape))
-
-    def __append_train_random(self, unlabeled_count):
-        image_train, image_unlabeled, class_train, class_unlabeled = train_test_split(
-            self.image_unlabeled, self.class_unlabeled, test_size=unlabeled_count, shuffle=True)
-        self.image_train = np.concatenate([self.image_train, image_train], axis=0)
-        self.class_train = np.concatenate([self.class_train, class_train], axis=0)
-
-        self.image_unlabeled = image_unlabeled
-        self.class_unlabeled = class_unlabeled
-
-    def __append_train_confident(self, append_train_count, out_dir, model):
-        predict_result = model.predict(
-            self.image_unlabeled,
-            out_dir,
-        )
-
-        # sort by top predict value
-        predict_max_value = predict_result.max(axis=1).to_numpy()
-        indices = np.argsort(-predict_max_value)
-        image_sorted = self.image_unlabeled[indices]
-        class_sorted = self.class_unlabeled[indices]
-
-        # extract next addition value
-        image_train = image_sorted[:append_train_count]
-        class_train = class_sorted[:append_train_count]
-        image_unlabeled = image_sorted[append_train_count:]
-        class_unlabeled = class_sorted[append_train_count:]
-
-        # overwrite _train, unlabeled
-        self.image_train = np.concatenate([self.image_train, image_train], axis=0)
-        self.class_train = np.concatenate([self.class_train, class_train], axis=0)
-        self.image_unlabeled = image_unlabeled
-        self.class_unlabeled = class_unlabeled
-
-    def __append_train_unconfident(self, append_train_count, out_dir, model):
-        predict_result = model.predict(
-            self.image_unlabeled,
-            out_dir,
-        )
-
-        # sort by top predict value
-        predict_max_value = predict_result.max(axis=1).to_numpy()
-        indices = np.argsort(predict_max_value)
-        image_sorted = self.image_unlabeled[indices]
-        class_sorted = self.class_unlabeled[indices]
-
-        # extract next addition value
-        image_train = image_sorted[:append_train_count]
-        class_train = class_sorted[:append_train_count]
-        image_unlabeled = image_sorted[append_train_count:]
-        class_unlabeled = class_sorted[append_train_count:]
-
-        # overwrite _train, unlabeled
-        self.image_train = np.concatenate([self.image_train, image_train], axis=0)
-        self.class_train = np.concatenate([self.class_train, class_train], axis=0)
-        self.image_unlabeled = image_unlabeled
-        self.class_unlabeled = class_unlabeled
-
-
-    def get_one_hot(self):
-        class_train = keras.utils.to_categorical(self.class_train, self.class_num)
-        class_val = keras.utils.to_categorical(self.class_val, self.class_num)
-        return class_train, class_val
 
 
     def input_shape(self):
-        return (self.width, self.height, self.channel)
+        return (self.width, self.height, self.channel, 1)
 

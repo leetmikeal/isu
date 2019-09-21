@@ -7,10 +7,20 @@ class Verbose(Callback):
         pass
 
     def on_epoch_end(self, epoch, logs=None):
-        print('train {:03d} (loss:{:.5f}, acc:{:.5f}), val (loss: {:.5f}, acc:{:.5f})'.format(
+        # print('train {:03d} (loss:{:.5f}, acc:{:.5f}), val (loss: {:.5f}, acc:{:.5f})'.format(
+        #     epoch,
+        #     logs['train_loss'],
+        #     logs['train_acc'],
+        #     logs['val_loss'],
+        #     logs['val_acc']
+        # ))
+        # print('train {:03d} (loss:{:.5f}), val (loss: {:.5f})'.format(
+        #     epoch,
+        #     logs['train_loss'],
+        #     logs['val_loss'],
+        # ))
+        print('train {:03d} (loss:{:.5f}), val (loss: {:.5f})'.format(
             epoch,
-            logs['train_loss'],
-            logs['train_acc'],
+            logs['loss'],
             logs['val_loss'],
-            logs['val_acc']
         ))
