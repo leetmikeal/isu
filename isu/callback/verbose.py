@@ -19,8 +19,14 @@ class Verbose(Callback):
         #     logs['train_loss'],
         #     logs['val_loss'],
         # ))
-        print('train {:03d} (loss:{:.5f}), val (loss: {:.5f})'.format(
-            epoch,
-            logs['loss'],
-            logs['val_loss'],
-        ))
+        # print('train {:03d} (loss:{:.5f}), val (loss: {:.5f})'.format(
+        #     epoch,
+        #     logs['loss'],
+        #     logs['val_loss'],
+        # ))
+
+        train_batch_returns = logs['batch_train_history']
+        val_batch_returns = logs['batch_val_history']
+        print('train : {}'.format(train_batch_returns))
+        print('val : {}'.format(val_batch_returns))
+

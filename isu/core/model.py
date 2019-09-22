@@ -10,6 +10,7 @@ mydir = os.path.dirname(os.path.dirname(__file__))
 sys.path.insert(0, mydir)
 
 from utility.save import check_dir
+from model.unet3d_metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient
 
 class Model():
     def __init__(self, application, input_shape, epochs, batch_size, lr, verbose=False):
@@ -21,7 +22,7 @@ class Model():
         self.verbose = verbose
 
         self.__create_model()
-        # self.__set_optimizer()
+        self.__set_optimizer()
 
     def __create_model(self):
         """create model
@@ -50,9 +51,8 @@ class Model():
         #     initial_learning_rate=self.lr.init)
         model = unet_model_3d(
             self.input_shape, 
-            depth=2, 
-            n_base_filters=4, 
-            initial_learning_rate=self.lr.init)
+            depth=3, 
+            n_base_filters=16)
 
         if self.verbose:
             model.summary()
@@ -60,16 +60,39 @@ class Model():
         self.model = model
 
     
-    def __set_optimizer(self):
-        from keras.optimizers import Adagrad
-        optimizer = Adagrad(lr=self.lr.init)
+    def save_plot_model(self, save_path):
+        from keras.utils import plot_model
+        plot_model(self.model, save_path)
+    
+    def __set_optimizer(self, n_labels=1, include_label_wise_dice_coefficients=False, metrics=dice_coefficient):
+        # from keras.optimizers import Adagrad, SGD
+        # # optimizer = Adagrad(lr=self.lr.init)
+        # optimizer = SGD(lr=self.lr.init, momentum=0.9, decay=1e-4, nesterov=True)
 
-        self.model.compile(
-            loss='categorical_crossentropy', 
-            optimizer=optimizer, 
-            metrics=['accuracy']
-            )
 
+        # self.model.compile(
+        #     loss='categorical_crossentropy', 
+        #     optimizer=optimizer, 
+        #     metrics=['accuracy']
+        #     )
+        # self.model.compile(
+        #     loss='binary_crossentropy', 
+        #     optimizer=optimizer
+        #     )
+
+        if not isinstance(metrics, list):
+            metrics = [metrics]
+
+        if include_label_wise_dice_coefficients and n_labels > 1:
+            label_wise_dice_metrics = [get_label_dice_coefficient_function(index) for index in range(n_labels)]
+            if metrics:
+                metrics = metrics + label_wise_dice_metrics
+            else:
+                metrics = label_wise_dice_metrics
+
+        optimizer=keras.optimizers.Adam(lr=self.lr.init)
+        self.model.compile(optimizer=optimizer, loss=dice_coefficient_loss, metrics=metrics)
+        # model.compile(optimizer=Adam(lr=initial_learning_rate, epsilon=None), loss='binary_crossentropy')
     
     def train(self, sample, out_dir):
         """training
@@ -89,24 +112,41 @@ class Model():
         # )
         from model_action import train as model_train
 
-        self.model.fit(
-            x=sample.image_train,
-            y=sample.class_train,
-            epochs=self.epochs,
-            batch_size=self.batch_size,
-            shuffle=True,
-            validation_data=(sample.image_val, sample.class_val),
-            callbacks=callbacks)
-        # model_train(
-        #     self.model,
-        #     sample.image_train,
-        #     sample.image_val,
-        #     sample.class_train,
-        #     sample.class_val,
-        #     self.epochs,
-        #     self.batch_size,
-        #     callbacks=callbacks
-        # )
+        # self.model.fit(
+        #     x=sample.image_train,
+        #     y=sample.class_train,
+        #     epochs=self.epochs,
+        #     batch_size=self.batch_size,
+        #     shuffle=True,
+        #     validation_data=(sample.image_val, sample.class_val),
+        #     callbacks=callbacks)
+
+        # print('saving input data')
+        # self.save_input(os.path.join(out_dir, 'input_train'), sample.image_train)
+        # self.save_input(os.path.join(out_dir, 'input_val'), sample.image_val)
+        # self.save_input(os.path.join(out_dir, 'label_train'), sample.class_train)
+        # self.save_input(os.path.join(out_dir, 'label_train'), sample.class_val)
+
+        model_train(
+            self.model,
+            sample.image_train,
+            sample.image_val,
+            sample.class_train,
+            sample.class_val,
+            self.epochs,
+            self.batch_size,
+            callbacks=callbacks
+        )
+
+
+    def save_input(self, save_dir, data):
+        from tqdm import tqdm
+        import cv2
+        for i in tqdm(range(data.shape[0])):
+            for j in range(data.shape[1]):
+                image = ((data[i, j, :, :, 0] + 0.5) * 255.0).astype(np.uint8)
+                path = os.path.join(save_dir, 'image_{:05d}_{:04d}.png'.format(i, j))
+                cv2.imwrite(image, path)
 
     def predict(self, image_unlabeled, out_dir):
 

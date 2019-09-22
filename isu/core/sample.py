@@ -105,7 +105,7 @@ class Sample():
                 boxcell.append(img)
 
             boxcell = np.concatenate(boxcell, axis=2)
-            boxcell = np.array(boxcell, dtype=np.float16) / 255.0
+            boxcell = np.array(boxcell, dtype=np.float16)
 
             label_path = os.path.join(dir_path, 'label', os.path.basename(dataset_path))
             for path in tqdm(
@@ -120,7 +120,7 @@ class Sample():
 
                 labelcell.append(label)
             labelcell = np.concatenate(labelcell, axis=2)
-            labelcell = np.array(labelcell, dtype=np.float16) / 255.0
+            labelcell = np.array(labelcell, dtype=np.float16)
 
             image_list.append(boxcell)
             label_list.append(labelcell)
@@ -133,11 +133,13 @@ class Sample():
             print('cropping image')
 
         raw_count = len(image_raw_list)
-        image_index_list = np.random.randint(0, raw_count, count)
+        # image_index_list = np.random.randint(0, raw_count, count)
 
         crop_image_list = []
         crop_class_list = []
-        for idx in tqdm(image_index_list, disable=(not self.verbose)):
+        c = 0
+        while(c < count):
+            idx = np.random.randint(0, raw_count)
             image = image_raw_list[idx]
             cl = class_raw_list[idx]
 
@@ -148,8 +150,12 @@ class Sample():
             crop_image = image[range_x:range_x+size[0], range_y:range_y+size[1], range_z:range_z+size[2], :]
             crop_class = cl[range_x:range_x+size[0], range_y:range_y+size[1], range_z:range_z+size[2], :]
 
+            if (crop_class.max() == 0):
+                continue
+
             crop_image_list.append(crop_image)
             crop_class_list.append(crop_class)
+            c += 1
 
         return np.array(crop_image_list), np.array(crop_class_list)
 
@@ -160,15 +166,18 @@ class Sample():
 
         img = img.reshape((img.shape[0], img.shape[1], 1, 1))
 
+        img = img.astype(np.float16) / 255.0 - 0.5
+
         return img
 
     def __load_single_class_from_file(self, path):
         img = cv2.imread(path, cv2.IMREAD_COLOR)
         b, g, r = cv2.split(img)
 
-        r = r.reshape((r.shape[0], r.shape[1], 1, 1))
+        img = r.reshape((r.shape[0], r.shape[1], 1, 1))
+        img = img.astype(np.float16) / 255.0 - 0.5
 
-        return r
+        return img
 
     def split(self, train_count, val_count, val_biased=False):
         if val_biased:

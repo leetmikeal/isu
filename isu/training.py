@@ -107,6 +107,7 @@ def training(
         lr_epochs (int): number of epoch to keep learning rate value
         verbose (boolean): output debug information
     """
+    # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     # load images
     sample = Sample(
@@ -145,6 +146,10 @@ def training(
         lr=lr,
         verbose=verbose
         )
+
+    # # debug output
+    # if verbose:
+    #     model.save_plot_model(os.path.join(out_dir, 'model.png'))
 
     # training
     model.train(sample, out_dir)

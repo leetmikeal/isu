@@ -4,6 +4,7 @@ import sys
 import math
 
 from tqdm import tqdm
+import numpy as np
 
 
 def load_numpy(numpy_cache_dir, use_for):
@@ -77,26 +78,30 @@ def train(
         callbacks.on_epoch_begin(epoch=i, logs=callback_logs)
         # print_epoch_start_time_training_validation(i + 1, epochs)
 
-        loss_sum = 0.0
-        acc_sum = 0.0
+        train_batch_returns = []
+
+        p = np.random.permutation(image_training.shape[0])
+        image_training_shuffle = image_training[p]
+        label_training_shuffle = label_training[p]
 
         # load numpy cache and train on batch
         train_generator = tqdm(
-            iterable=iter_train_batch(image_training, label_training, batch_size),
-            total=math.ceil(image_training.shape[0] / batch_size))
+            iterable=iter_train_batch(image_training_shuffle, label_training_shuffle, batch_size),
+            total=math.ceil(image_training_shuffle.shape[0] / batch_size))
         for j, [image_batch, label_batch] in enumerate(train_generator):
             # TODO: 2nd arguments 'batch_logs' must be implemented
             callbacks.on_batch_begin(j, {})
 
             # main process
-            loss = model.train_on_batch(
+            batch_return = model.train_on_batch(
                 x=image_batch,
                 y=label_batch,
                 class_weight=class_weight)
 
             # result
             num_image = image_batch.shape[0]
-            loss_sum += loss * num_image
+            train_batch_returns.append(batch_return)
+            # loss_sum += loss * num_image
 
             # TODO: 2nd arguments 'batch_logs' must be implemented
             callbacks.on_batch_end(j, {})
@@ -110,32 +115,42 @@ def train(
             #                                             acc_sum=acc_sum,
             #                                             num_image_total=num_image_total,
             #                                             )
-        num_image_total = image_training.shape[0]
-        train_loss = loss_sum / num_image_total
+        num_train_image_total = image_training_shuffle.shape[0]
+        # train_loss = loss_sum / num_image_total
 
         # Validation after batch loop
-        loss_sum = 0.0
+        validate_batch_returns = []
         validate_generator = tqdm(
             iterable=iter_train_batch(image_validation, label_validation, batch_size), 
             total=math.ceil(image_validation.shape[0] / batch_size))
         for j, [image_batch, label_batch] in enumerate(validate_generator):
 
             # main process
-            loss = model.test_on_batch(x=image_batch, y=label_batch)
+            batch_return = model.test_on_batch(x=image_batch, y=label_batch)
 
             # result
             num_image = image_batch.shape[0]
-            loss_sum += loss * num_image
+            # loss_sum += loss * num_image
+            validate_batch_returns.append(batch_return)
 
-        num_image_total = image_validation.shape[0]
-        val_loss = loss_sum / num_image_total
+        num_val_image_total = image_validation.shape[0]
+        # val_loss = loss_sum / num_image_total
         # print_batch_end_time_training_validation(val_loss=val_loss, val_acc=val_acc)
         # all batches end
         # print_all_batch_end_time_training_validation(time_start_batch=time_start_batch)
 
+        import json
+        from utility.save import check_dir
+        weight_dump = model.get_weights()
+        for widx, weight in enumerate(weight_dump):
+            model_path = 'work/output/{:04d}/weight_{:02d}.json'.format(i, widx)
+            check_dir(model_path)
+            with open(model_path, 'w') as f:
+                f.write(json.dumps(weight.tolist()))
+
         epoch_logs = {
-            'loss': train_loss,
-            'val_loss': val_loss,
+            'batch_train_history': train_batch_returns,
+            'batch_val_history': validate_batch_returns,
         }
         callbacks.on_epoch_end(i, epoch_logs)
 
