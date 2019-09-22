@@ -98,15 +98,16 @@ def create_convolution_block(input_layer, n_filters, batch_normalization=False, 
     :return:
     """
     layer = Conv3D(n_filters, kernel, padding=padding, strides=strides, kernel_initializer='glorot_normal', bias_initializer='random_uniform')(input_layer)
-    if batch_normalization:
-        layer = BatchNormalization()(layer)
-    elif instance_normalization:
-        try:
-            from keras_contrib.layers.normalization import InstanceNormalization
-        except ImportError:
-            raise ImportError("Install keras_contrib in order to use instance normalization."
-                              "\nTry: pip install git+https://www.github.com/farizrahman4u/keras-contrib.git")
-        layer = InstanceNormalization()(layer)
+    layer = BatchNormalization()(layer)
+    # if batch_normalization:
+    #     layer = BatchNormalization()(layer)
+    # elif instance_normalization:
+    #     try:
+    #         from keras_contrib.layers.normalization import InstanceNormalization
+    #     except ImportError:
+    #         raise ImportError("Install keras_contrib in order to use instance normalization."
+    #                           "\nTry: pip install git+https://www.github.com/farizrahman4u/keras-contrib.git")
+    #     layer = InstanceNormalization()(layer)
     if activation is None:
         return Activation('relu')(layer)
     else:

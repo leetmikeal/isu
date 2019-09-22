@@ -11,6 +11,7 @@ sys.path.insert(0, mydir)
 
 from utility.save import check_dir
 from model.unet3d_metrics import dice_coefficient_loss, get_label_dice_coefficient_function, dice_coefficient
+from model.unet3d_metrics import weighted_dice_coefficient_loss
 
 class Model():
     def __init__(self, application, input_shape, epochs, batch_size, lr, verbose=False):
@@ -43,16 +44,27 @@ class Model():
         #     channel=self.input_shape[2],
         #     weights_init=None
         # )
-        from model.unet import unet_model_3d
+
+        # from model.unet import unet_model_3d
+        # # model = unet_model_3d(
+        # #     self.input_shape, 
+        # #     depth=3, 
+        # #     n_base_filters=8, 
+        # #     initial_learning_rate=self.lr.init)
         # model = unet_model_3d(
         #     self.input_shape, 
-        #     depth=3, 
-        #     n_base_filters=8, 
-        #     initial_learning_rate=self.lr.init)
-        model = unet_model_3d(
-            self.input_shape, 
-            depth=2, 
-            n_base_filters=8)
+        #     depth=2, 
+        #     n_base_filters=8)
+
+        from model.isensee2017 import isensee2017_model
+
+        model = isensee2017_model(
+            self.input_shape,
+            depth=5,
+            n_base_filters=16,
+            n_labels=1,
+        )
+
 
         if self.verbose:
             model.summary()
@@ -91,7 +103,8 @@ class Model():
                 metrics = label_wise_dice_metrics
 
         optimizer=keras.optimizers.Adam(lr=self.lr.init)
-        self.model.compile(optimizer=optimizer, loss=dice_coefficient_loss, metrics=metrics)
+        # self.model.compile(optimizer=optimizer, loss=dice_coefficient_loss, metrics=metrics)
+        self.model.compile(optimizer=optimizer, loss=weighted_dice_coefficient_loss, metrics=metrics)
         # model.compile(optimizer=Adam(lr=initial_learning_rate, epsilon=None), loss='binary_crossentropy')
     
     def train(self, sample, out_dir):
