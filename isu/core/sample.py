@@ -56,6 +56,7 @@ class Sample():
             self.debug_print()
 
     def debug_print(self):
+        return
         for idx, [i, c] in enumerate(zip(self.image_list, self.class_list)):
             print('loaded {} image : {}'.format(idx, i.shape))
             print('loaded {} class : {}'.format(idx, c.shape))
@@ -105,7 +106,7 @@ class Sample():
                 boxcell.append(img)
 
             boxcell = np.concatenate(boxcell, axis=2)
-            boxcell = np.array(boxcell, dtype=np.float16)
+            boxcell = np.array(boxcell, dtype=np.float32)
 
             label_path = os.path.join(dir_path, 'label', os.path.basename(dataset_path))
             for path in tqdm(
@@ -120,7 +121,7 @@ class Sample():
 
                 labelcell.append(label)
             labelcell = np.concatenate(labelcell, axis=2)
-            labelcell = np.array(labelcell, dtype=np.float16)
+            labelcell = np.array(labelcell, dtype=np.float32)
 
             image_list.append(boxcell)
             label_list.append(labelcell)
@@ -166,7 +167,11 @@ class Sample():
 
         img = img.reshape((img.shape[0], img.shape[1], 1, 1))
 
-        img = img.astype(np.float16) / 255.0 - 0.5
+        img = img.astype(np.float32)
+        img -= np.mean(img, keepdims=True)
+        img /= (np.std(img, keepdims=True) + 1e-6)
+
+        # img = img.astype(np.float32) / 255.0 - 0.5
 
         return img
 
@@ -175,7 +180,9 @@ class Sample():
         b, g, r = cv2.split(img)
 
         img = r.reshape((r.shape[0], r.shape[1], 1, 1))
-        img = img.astype(np.float16) / 255.0 - 0.5
+        img[img > 0] = 1
+        img = img.astype(np.int8)
+        # img = img.astype(np.float32) / 255.0
 
         return img
 

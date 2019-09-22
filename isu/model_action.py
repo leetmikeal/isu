@@ -40,6 +40,7 @@ def train(
         batch_size,
         class_weight=None,
         callbacks=None,
+        save_weight=False,
         seed=None):
     # # メモリ確保の方法を変更
     from keras import callbacks as cbks

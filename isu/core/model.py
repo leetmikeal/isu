@@ -51,8 +51,8 @@ class Model():
         #     initial_learning_rate=self.lr.init)
         model = unet_model_3d(
             self.input_shape, 
-            depth=3, 
-            n_base_filters=16)
+            depth=2, 
+            n_base_filters=8)
 
         if self.verbose:
             model.summary()
@@ -101,7 +101,7 @@ class Model():
             sample (Sample): image and label data
         """
         # set callback
-        callbacks = self.__callbacks(out_dir)
+        callbacks = self.__callbacks(sample, out_dir)
         
         # class_train, class_val = sample.get_one_hot()
 
@@ -129,13 +129,16 @@ class Model():
 
         model_train(
             self.model,
-            sample.image_train,
-            sample.image_val,
-            sample.class_train,
-            sample.class_val,
-            self.epochs,
-            self.batch_size,
-            callbacks=callbacks
+            image_training=sample.image_train,
+            #image_validation=sample.image_train,
+            image_validation=sample.image_val,
+            label_training=sample.class_train,
+            #label_validation=sample.class_train,
+            label_validation=sample.class_val,
+            epochs=self.epochs,
+            batch_size=self.batch_size,
+            callbacks=callbacks,
+            save_weight=True  # for debug
         )
 
 
@@ -172,13 +175,13 @@ class Model():
         self.save_weight(save_weight_path)
 
 
-    def __callbacks(self, out_dir):
+    def __callbacks(self, sample, out_dir):
         callbacks = []
 
         # history
         from callback.history import History
         history_save_path = os.path.join(out_dir, 'history.csv')
-        history_callback = History(history_save_path)
+        history_callback = History(history_save_path, sample.image_train.shape[0], sample.image_val.shape[0])
         callbacks.append(history_callback)
 
         # learning rate schedule
@@ -194,7 +197,7 @@ class Model():
         # verbose
         if self.verbose:
             from callback.verbose import Verbose
-            verbose_callback = Verbose()
+            verbose_callback = Verbose(sample.image_train.shape[0], sample.image_val.shape[0])
             callbacks.append(verbose_callback)
 
         return callbacks
