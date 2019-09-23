@@ -37,9 +37,9 @@ def setup_argument_parser(parser):
         type=int,
         default=64)
     parser.add_argument(
-        '--sample-add',
-        help='sample addition method [random, confident, unconfident, high_entropy]',
-        default='random')
+        '--application',
+        help='deep learning structure [isensee2017, unet]',
+        default='isensee2017')
     parser.add_argument(
         '--sample-init',
         help='initial number of image sample',
@@ -86,6 +86,7 @@ def training(
     cache_image, 
     epochs, 
     batch_size, 
+    application,
     sample_init, 
     sample_val, 
     lr_init,
@@ -100,6 +101,7 @@ def training(
         cache_imgae (string): cache image directry path
         epochs (int): number of epoch
         bach_size (int): image batch size per epoch
+        application (string): model structure [isensee2017, unet]
         sample_init (int): number of initial training sample
         sample_val (int): number of validation image
         lr_init (float): learning rate initial value
@@ -137,9 +139,7 @@ def training(
 
     # create model
     model = Model(
-        application='bench',
-        # application='resnet20',
-        # application='resnet50',
+        application=application,
         input_shape=sample.input_shape(),
         epochs=epochs,
         batch_size=batch_size,
@@ -168,6 +168,7 @@ def main(args):
         cache_image=args.cache_image,
         epochs=args.epochs,
         batch_size=args.batch_size,
+        application=args.application,
         sample_init=args.sample_init,
         sample_val=args.sample_val,
         lr_init=args.lr_init,

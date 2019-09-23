@@ -36,6 +36,32 @@ class Model():
         """
         if self.verbose:
             print('input image size: {}'.format(self.input_shape))
+
+        if self.application == 'isensee2017':
+            from model.isensee2017 import isensee2017_model
+
+            model = isensee2017_model(
+                self.input_shape,
+                depth=4,
+                n_base_filters=8,
+                n_labels=1,
+            )
+        
+        elif self.application == 'unet':
+            from model.unet import unet_model_3d
+            # model = unet_model_3d(
+            #     self.input_shape, 
+            #     depth=3, 
+            #     n_base_filters=8, 
+            #     initial_learning_rate=self.lr.init)
+            model = unet_model_3d(
+                self.input_shape, 
+                depth=2, 
+                n_base_filters=8)
+
+        else:
+            raise ValueError('unknwon model name : {}'.format(self.application))
+
         # from model.main import generate_model_base
         # model = generate_model_base(
         #     preset=self.application,
@@ -44,27 +70,6 @@ class Model():
         #     channel=self.input_shape[2],
         #     weights_init=None
         # )
-
-        # from model.unet import unet_model_3d
-        # # model = unet_model_3d(
-        # #     self.input_shape, 
-        # #     depth=3, 
-        # #     n_base_filters=8, 
-        # #     initial_learning_rate=self.lr.init)
-        # model = unet_model_3d(
-        #     self.input_shape, 
-        #     depth=2, 
-        #     n_base_filters=8)
-
-        from model.isensee2017 import isensee2017_model
-
-        model = isensee2017_model(
-            self.input_shape,
-            depth=5,
-            n_base_filters=16,
-            n_labels=1,
-        )
-
 
         if self.verbose:
             model.summary()
