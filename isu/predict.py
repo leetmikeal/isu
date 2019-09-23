@@ -101,12 +101,12 @@ def prediction(
 
     # # save model
     # result.save(out_dir)
-    save_slice_result(result, out_dir)
+    save_slice_result(result, sample.padding_position, sample.originl_input_shape(), out_dir)
 
     print('completed!')
 
 
-def save_slice_result(nparray, dir_path):
+def save_slice_result(nparray, padding_position, input_shape, dir_path):
     print('result saving...')
     print('shape : {}'.format(nparray.shape))
 
@@ -114,8 +114,17 @@ def save_slice_result(nparray, dir_path):
     if not os.path.exists(base_path):
         os.makedirs(base_path)
 
+    nparray = nparray[
+        0,
+        0,
+        padding_position[0]:padding_position[0]+input_shape[0],
+        padding_position[1]:padding_position[1]+input_shape[1],
+        padding_position[2]:padding_position[2]+input_shape[2],
+        0
+    ]
+
     for iz in tqdm(range(nparray.shape[2])):
-        img = nparray[0, 0, :, :, iz, 0]
+        img = nparray[:, :, iz]
         saved_img = np.zeros(img.shape, dtype=np.uint8)
         saved_img[img > 0.5] = 255
 

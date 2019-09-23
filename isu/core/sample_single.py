@@ -20,7 +20,7 @@ class SampleSingle():
         self.width = 0
         self.height = 0
         self.depth = 0
-        self.padding_position = (,)
+        self.padding_position = None
 
         self.load()
 
@@ -96,7 +96,7 @@ class SampleSingle():
         y_back = int(math.floor((400 - self.height) / 2))
         z_front = int(math.ceil((400 - self.depth) / 2))
         z_back = int(math.floor((400 - self.depth) / 2))
-        self.padding_position = (x_flont, y_front, z_front)
+        self.padding_position = (x_front, y_front, z_front)
         boxcell = np.pad(boxcell, ((x_front, x_back), (y_front, y_back), (z_front, z_back), (0, 0)), 'constant')
 
         return boxcell
