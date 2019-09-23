@@ -9,7 +9,7 @@ from time import sleep
 
 
 import dataset
-from model import UNet
+# from model import UNet
 ##import tensorflow as tf
 
 ##config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True, per_process_gpu_memory_fraction=0.8))
@@ -18,7 +18,7 @@ from model import UNet
 
 
 
-def Process3DOC(ij, unet):
+def Process3DOC(ij, open_init_file, savedir, savefile):
     """3D Object Counter
     
     Parameters
@@ -29,15 +29,15 @@ def Process3DOC(ij, unet):
         defined in model.py
 
     """
-    openfile = unet.pre_path + '/' + unet.dataset + '_RB_0000.tif'
-    savedir = unet.output_path
-    savefile = unet.dataset + '_label_'
+    # openfile = unet.pre_path + '/' + unet.dataset + '_RB_0000.tif'
+    # savedir = unet.output_path
+    # savefile = unet.dataset + '_label_'
     
     
 
     print('1.Open Image Sequence')
     plugin = 'Image Sequence...'
-    args = {'open': openfile,
+    args = {'open': open_init_file,
             'number': '300',
             'increment': '1',
             'scale': '100',
