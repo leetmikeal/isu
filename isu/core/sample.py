@@ -176,12 +176,14 @@ class Sample():
         return img
 
     def __load_single_class_from_file(self, path):
-        img = cv2.imread(path, cv2.IMREAD_COLOR)
-        b, g, r = cv2.split(img)
+        img_color = cv2.imread(path, cv2.IMREAD_COLOR)
+        b, g, r = cv2.split(img_color)
 
-        img = r.reshape((r.shape[0], r.shape[1], 1, 1))
-        img[img > 0] = 1
-        img = img.astype(np.int8)
+        img = np.zeros((img_color.shape[0], img_color.shape[1]), dtype=np.int8)
+        img[r > 0] = 1
+        img[g > 0] = 1
+        img[b > 0] = 1
+        img = img.reshape((img.shape[0], img.shape[1], 1, 1))
         # img = img.astype(np.float32) / 255.0
 
         return img
