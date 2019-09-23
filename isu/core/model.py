@@ -31,10 +31,13 @@ class Model():
         self.lr = lr
         self.verbose = verbose
 
-        self.__create_model()
+        if (application is None and input_shape is None and epoch is None and batch_size is None):
+            return
+
+        self.__create_model(self.application, self.input_shape)
         self.__set_optimizer()
 
-    def __create_model(self):
+    def __create_model(self, application, input_shape):
         """create model
 
         Args:
@@ -44,19 +47,19 @@ class Model():
             model: keras model object
         """
         if self.verbose:
-            print('input image size: {}'.format(self.input_shape))
+            print('input image size: {}'.format(input_shape))
 
-        if self.application == 'isensee2017':
+        if application == 'isensee2017':
             from model.isensee2017 import isensee2017_model
 
             model = isensee2017_model(
-                self.input_shape,
+                input_shape,
                 depth=4,
                 n_base_filters=8,
                 n_labels=1,
             )
 
-        elif self.application == 'unet':
+        elif application == 'unet':
             from model.unet import unet_model_3d
             # model = unet_model_3d(
             #     self.input_shape,
@@ -64,14 +67,14 @@ class Model():
             #     n_base_filters=8,
             #     initial_learning_rate=self.lr.init)
             model = unet_model_3d(
-                self.input_shape,
+                input_shape,
                 depth=2,
                 n_base_filters=8)
 
         else:
             raise ValueError(
                 'unknwon model name : {}'.format(
-                    self.application))
+                    application))
 
         # from model.main import generate_model_base
         # model = generate_model_base(
@@ -191,10 +194,6 @@ class Model():
 
     def predict(self, image_unlabeled, out_dir):
 
-        unlabeled_count = image_unlabeled.shape[0] if image_unlabeled is not None else 0
-        result_path = os.path.join(
-            out_dir, 'predict_{:010d}.csv'.format(unlabeled_count))
-
         from model_action import predict as model_predict
 
         result = model_predict(
@@ -253,3 +252,27 @@ class Model():
     def save_weight(self, path):
         check_dir(path)
         self.model.save_weights(path)
+
+    @staticmethod
+    def from_file(path, batch_size, input_shape, verbose=False):
+        basepath = os.path.join(os.path.dirname(path), os.path.splitext(os.path.basename(path))[0])
+        structure_path = basepath + '.json'
+        weight_path = basepath + '.h5'
+        if not os.path.exists(structure_path):
+            raise ValueError('file was not found : {}'.format(structure_path))
+        if not os.path.exists(weight_path):
+            raise ValueError('file was not found : {}'.format(weight_path))
+
+        self.__create_model('isensee2017', input_shape)
+        # from keras.models import model_from_json
+        # model = model_from_json(structure_path)
+        model.load_weights(weight_path)
+
+        new_model = Model(None, None, None, None, None)
+        new_model.model = model
+        new_model.batch_size = batch_size
+        new_model.verbose = verbose
+        return new_model
+
+
+        

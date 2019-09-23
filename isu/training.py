@@ -111,13 +111,17 @@ def training(
     # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     # load images
+    image_dir_path = os.path.join(sample_dir, 'input')
+    label_dir_path = os.path.join(sample_dir, 'label')
     sample = Sample(
-        dir_path=sample_dir,
+        image_dir_path=image_dir_path,
+        label_dir_path=label_dir_path,
         cache_image=cache_image,
         crop_size=(64, 64, 64),
         data_count=sample_init + sample_val,
         verbose=verbose)
     sample.load()
+    sample.crop_image()
 
     # split data
     sample.split(

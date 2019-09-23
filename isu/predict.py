@@ -45,6 +45,7 @@ def setup_argument_parser(parser):
 
 def prediction(
         sample_dir,
+        model_path,
         out_dir,
         batch_size,
         application,
@@ -61,39 +62,33 @@ def prediction(
     # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     # load images
-    return
     sample = Sample(
-        dir_path=sample_dir,
-        cache_image=cache_image,
-        crop_size=(64, 64, 64),
-        data_count=sample_init + sample_val,
+        image_dir_path=sample_dir,
         verbose=verbose)
     sample.load()
 
-    # split data
-    sample.split(
-        train_count=sample_init,
-        val_count=sample_val,
-        val_biased=True
-    )
+    # # split data
+    # sample.split(
+    #     train_count=sample_init,
+    #     val_count=sample_val,
+    #     val_biased=True
+    # )
 
     if not os.path.exists(out_dir):
         os.makedirs(out_dir)
 
-    # learning rate
-    lr = LearningRateSchedulerConf(
-        init=lr_init,
-        epoch=lr_epochs,
-        step=lr_step
-    )
+    # # learning rate
+    # lr = LearningRateSchedulerConf(
+    #     init=lr_init,
+    #     epoch=lr_epochs,
+    #     step=lr_step
+    # )
 
     # create model
-    model = Model(
-        application=application,
-        input_shape=sample.input_shape(),
-        epochs=epochs,
+    model = Model.from_file(
+        path=model_path,
         batch_size=batch_size,
-        lr=lr,
+        input_shape=sample.image_raw_list[0].shape,
         verbose=verbose
     )
 
@@ -102,10 +97,11 @@ def prediction(
     #     model.save_plot_model(os.path.join(out_dir, 'model.png'))
 
     # training
-    model.train(sample, out_dir)
+    input_sample = np.array([sample.image_raw_list[0]])
+    model.predict(input_sample, out_dir)
 
-    # save model
-    model.save(out_dir)
+    # # save model
+    # model.save(out_dir)
 
     print('completed!')
 

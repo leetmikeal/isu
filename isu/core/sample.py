@@ -11,8 +11,9 @@ from tqdm import tqdm
 
 
 class Sample():
-    def __init__(self, dir_path, cache_image, crop_size, data_count, verbose):
-        self.dir_path = dir_path
+    def __init__(self, image_dir_path, label_dir_path=None, cache_image=None, crop_size=None, data_count=None, verbose=False):
+        self.image_dir_path = image_dir_path
+        self.label_dir_path = label_dir_path
         self.cache_image = cache_image
         self.crop_size = crop_size
         self.data_count = data_count
@@ -23,6 +24,8 @@ class Sample():
 
         self.image_list = None
         self.class_list = None
+        self.image_raw_list = None
+        self.class_raw_list = None
 
     def load(self):
         if self.cache_image is not None:
@@ -41,9 +44,14 @@ class Sample():
 
                 return
 
-        image_raw_list, class_raw_list = self.__load_image(self.dir_path)
+        image_raw_list, class_raw_list = self.__load_image(self.image_dir_path, self.label_dir_path)
+        self.image_raw_list = image_raw_list
+        self.class_raw_list = class_raw_list
+
+
+    def crop_image(self):
         image_list, class_list = self.__crop_image(
-            image_raw_list, class_raw_list, self.data_count, self.crop_size)
+            self.image_raw_list, self.class_raw_list, self.data_count, self.crop_size)
 
         if self.cache_image is not None and os.path.exists(self.cache_image):
             image_cache_path, class_cache_path = self.__get_cache_file_path()
@@ -52,10 +60,12 @@ class Sample():
 
         self.image_list = image_list
         self.class_list = class_list
-        self.__set_attributes()
 
+        self.__set_attributes()
+        
         if self.verbose:
             self.debug_print()
+
 
     def debug_print(self):
         return
@@ -73,11 +83,12 @@ class Sample():
         class_path = os.path.join(self.cache_image, 'class.npy')
         return image_path, class_path
 
-    def __load_image(self, dir_path):
+    def __load_image(self, image_dir_path, label_dir_path=None):
         """load images
 
         Args:
-            dir_path (string): loadimage base directory path
+            image_dir_path (string): loadimage base directory path
+            label_dir_path (string): loadimage base directory path
 
         Returns:
             image_list: image list by numpy array
@@ -89,7 +100,7 @@ class Sample():
 
         image_list = []
         label_list = []
-        for dataset_path in glob.iglob(os.path.join(dir_path, 'input', '*')):
+        for dataset_path in glob.iglob(os.path.join(image_dir_path, '*')):
             boxcell = []
             labelcell = []
             for path in tqdm(
@@ -106,24 +117,26 @@ class Sample():
             boxcell = np.concatenate(boxcell, axis=2)
             boxcell = np.array(boxcell, dtype=np.float32)
 
-            label_path = os.path.join(
-                dir_path, 'label', os.path.basename(dataset_path))
-            for path in tqdm(
-                glob.iglob(
-                    os.path.join(
-                        label_path,
-                        '*.tif')),
-                disable=(
-                    not self.verbose)):
-
-                label = self.__load_single_class_from_file(path)
-
-                labelcell.append(label)
-            labelcell = np.concatenate(labelcell, axis=2)
-            labelcell = np.array(labelcell, dtype=np.float32)
-
             image_list.append(boxcell)
-            label_list.append(labelcell)
+
+            if label_dir_path is not None and os.path.exists(label_dir_path):
+                label_path = os.path.join(
+                    label_dir_path, os.path.basename(dataset_path))
+                for path in tqdm(
+                    glob.iglob(
+                        os.path.join(
+                            label_path,
+                            '*.tif')),
+                    disable=(
+                        not self.verbose)):
+
+                    label = self.__load_single_class_from_file(path)
+
+                    labelcell.append(label)
+                labelcell = np.concatenate(labelcell, axis=2)
+                labelcell = np.array(labelcell, dtype=np.float32)
+
+                label_list.append(labelcell)
 
         return image_list, label_list
 
