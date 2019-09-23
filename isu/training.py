@@ -21,6 +21,9 @@ def setup_argument_parser(parser):
         help='destination directory path',
         required=True)
     parser.add_argument(
+        '--in-weight',
+        help='initial model weight')
+    parser.add_argument(
         '--cache-image',
         help='cache image saving directory path')
     parser.add_argument(
@@ -52,6 +55,11 @@ def setup_argument_parser(parser):
         type=int,
         default=100)
     parser.add_argument(
+        '--sample-crop',
+        help='crop size',
+        type=int,
+        default=64)
+    parser.add_argument(
         '--lr-init',
         help='initial learning rate',
         type=float,
@@ -81,6 +89,7 @@ class LearningRateSchedulerConf():
 
 def training(
         sample_dir,
+        initial_weight,
         out_dir,
         cache_image,
         epochs,
@@ -88,6 +97,7 @@ def training(
         application,
         sample_init,
         sample_val,
+        sample_crop,
         lr_init,
         lr_step,
         lr_epochs,
@@ -96,6 +106,7 @@ def training(
 
     Args:
         sample_dir (string): sample directory path
+        initial_weight (string): model initial weight path
         out_dir (string): output result saving directory path
         cache_imgae (string): cache image directry path
         epochs (int): number of epoch
@@ -103,6 +114,7 @@ def training(
         application (string): model structure [isensee2017, unet]
         sample_init (int): number of initial training sample
         sample_val (int): number of validation image
+        sample_crop (int): crop size
         lr_init (float): learning rate initial value
         lr_step (float): learning rate changing value
         lr_epochs (int): number of epoch to keep learning rate value
@@ -118,11 +130,11 @@ def training(
         label_dir_path=label_dir_path,
         cache_image=cache_image,
         #crop_size=(64, 64, 64),
-        crop_size=(128, 128, 128),
+        #crop_size=(128, 128, 128),
+        crop_size=(sample_crop,) * 3,
         data_count=sample_init + sample_val,
         verbose=verbose)
     sample.load()
-    sample.crop_image()
 
     # split data
     sample.split(
@@ -145,6 +157,7 @@ def training(
     model = Model(
         application=application,
         input_shape=sample.input_shape(),
+        initial_weight=initial_weight,
         epochs=epochs,
         batch_size=batch_size,
         lr=lr,
@@ -168,12 +181,14 @@ def main(args):
     training(
         sample_dir=args.in_dir,
         out_dir=args.out_dir,
+        initial_weight=args.in_weight,
         cache_image=args.cache_image,
         epochs=args.epochs,
         batch_size=args.batch_size,
         application=args.application,
         sample_init=args.sample_init,
         sample_val=args.sample_val,
+        sample_crop=args.sample_crop,
         lr_init=args.lr_init,
         lr_step=args.lr_step,
         lr_epochs=args.lr_epochs,

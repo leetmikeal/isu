@@ -48,6 +48,8 @@ class Sample():
         self.image_raw_list = image_raw_list
         self.class_raw_list = class_raw_list
 
+        self.crop_image()
+
 
     def crop_image(self):
         image_list, class_list = self.__crop_image(

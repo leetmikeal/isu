@@ -23,18 +23,26 @@ class Model():
             epochs,
             batch_size,
             lr,
+            initial_weight=None,
             verbose=False):
         self.application = application
         self.input_shape = input_shape
+        self.initial_weight = initial_weight
         self.epochs = epochs
         self.batch_size = batch_size
         self.lr = lr
         self.verbose = verbose
 
-        if (application is None and input_shape is None and epochs is None and batch_size is None):
+        if (application is None 
+                and input_shape is None 
+                and epochs is None 
+                and batch_size is None 
+                and initial_weight is None):
             return
 
         self.__create_model(self.application, self.input_shape)
+        self.__load_weight(self.initial_weight)
+
         self.__set_optimizer()
 
     def __create_model(self, application, input_shape):
@@ -131,6 +139,21 @@ class Model():
             loss=weighted_dice_coefficient_loss,
             metrics=metrics)
         # model.compile(optimizer=Adam(lr=initial_learning_rate, epsilon=None), loss='binary_crossentropy')
+
+
+    def __load_weight(self, initial_weight):
+        """load weight from file
+        
+        Args:
+            initial_weight (string): initial weight path
+        """
+        if not os.path.exists(initial_weight):
+            print('WARNING: initial weight file was not found. | {}'.format(initial_weight))
+
+        self.model.load_weights(initial_weight)
+        if self.verbose:
+            print('loaded initial weight | {}'.format(initial_weight))
+
 
     def train(self, sample, out_dir):
         """training
