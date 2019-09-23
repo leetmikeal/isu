@@ -225,7 +225,7 @@ def validate(model, batch_size, verbose, source_image, result_path):
 def predict(
         model,
         image_unlabeled,
-        result_path='',
+        result_dir_path='',
         batch_size=32,
         verbose=False):
     """predict
@@ -233,7 +233,7 @@ def predict(
     Args:
         model (keras model): keras model
         image_unlabeled (numpy.array): 4 dimension numpy array [image_count, width, height, channel]
-        result_path (string, optional): saving result path (*.csv)
+        result_dir_path (string, optional): saving result path (*.csv)
         batch_size (int, optional): predict batchsize
         verbose (bool, optional): output debug information. Defaults to False.
     
@@ -248,6 +248,12 @@ def predict(
     # if os.path.exists(result_path):
     #     df_pred = pd.read_csv(result_path)
     #     return df_pred
+
+    result_path = os.path.join(result_dir_path, 'predict.npy')
+    if os.path.exists(result_path):
+        pred = np.load(result_path)
+        print('cached predicted : {}'.format(result_path))
+        return pred
 
     if verbose:
         print('predicting... : {}'.format(image_unlabeled.shape))
@@ -267,11 +273,13 @@ def predict(
     #     image_unlabeled,
     #     batch_size=batch_size,
     #     verbose=verbose)
-    df_pred = pd.DataFrame(np.concatenate(pred_list))
+    # df_pred = pd.DataFrame(np.concatenate(pred_list))
+    pred = np.array(pred_list)
+    np.save(result_path, pred)
 
-    if result_path  != '' and os.path.exists(os.path.dirname(result_path)):
-        df_pred.to_csv(result_path, index=False, encoding='utf-8')
-        if verbose:
-            print('saved result as csv : {}'.format(result_path))
+    # if result_path  != '' and os.path.exists(os.path.dirname(result_path)):
+    #     df_pred.to_csv(result_path, index=False, encoding='utf-8')
+    #     if verbose:
+    #         print('saved result as csv : {}'.format(result_path))
 
-    return df_pred
+    return pred

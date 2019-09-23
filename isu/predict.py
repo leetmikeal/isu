@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 from utility.save import check_dir
-from core import Model, Sample
+from core import Model, SampleSingle
 
 
 def setup_argument_parser(parser):
@@ -32,7 +32,7 @@ def setup_argument_parser(parser):
         '--batch-size',
         help='batch size',
         type=int,
-        default=64)
+        default=1)
     parser.add_argument(
         '--application',
         help='deep learning structure [isensee2017, unet]',
@@ -62,10 +62,9 @@ def prediction(
     # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     # load images
-    sample = Sample(
+    sample = SampleSingle(
         image_dir_path=sample_dir,
         verbose=verbose)
-    sample.load()
 
     # # split data
     # sample.split(
@@ -88,7 +87,7 @@ def prediction(
     model = Model.from_file(
         path=model_path,
         batch_size=batch_size,
-        input_shape=sample.image_raw_list[0].shape,
+        input_shape=sample.input_shape(),
         verbose=verbose
     )
 
@@ -97,13 +96,31 @@ def prediction(
     #     model.save_plot_model(os.path.join(out_dir, 'model.png'))
 
     # training
-    input_sample = np.array([sample.image_raw_list[0]])
-    model.predict(input_sample, out_dir)
+    input_sample = np.array([sample.image])
+    result = model.predict(input_sample, out_dir)
 
     # # save model
-    # model.save(out_dir)
+    # result.save(out_dir)
+    save_slice_result(result, out_dir)
 
     print('completed!')
+
+
+def save_slice_result(nparray, dir_path):
+    print('result saving...')
+    print('shape : {}'.format(nparray.shape))
+
+    base_path = os.path.join(dir_path, 'result_images')
+    if not os.path.exists(base_path):
+        os.makedirs(base_path)
+
+    for iz in tqdm(range(nparray.shape[2])):
+        img = nparray[0, 0, :, :, iz, 0]
+        saved_img = np.zeros(img.shape, dtype=np.uint8)
+        saved_img[img > 0.5] = 255
+
+        saving_path = os.path.join(base_path, '{:04d}.tif'.format(iz))
+        cv2.imwrite(saving_path, saved_img)
 
 
 def main(args):

@@ -31,7 +31,7 @@ class Model():
         self.lr = lr
         self.verbose = verbose
 
-        if (application is None and input_shape is None and epoch is None and batch_size is None):
+        if (application is None and input_shape is None and epochs is None and batch_size is None):
             return
 
         self.__create_model(self.application, self.input_shape)
@@ -199,7 +199,7 @@ class Model():
         result = model_predict(
             self.model,
             image_unlabeled,
-            result_path,
+            result_dir_path=out_dir,
             batch_size=self.batch_size,
             verbose=self.verbose
         )
@@ -263,7 +263,15 @@ class Model():
         if not os.path.exists(weight_path):
             raise ValueError('file was not found : {}'.format(weight_path))
 
-        self.__create_model('isensee2017', input_shape)
+        from model.isensee2017 import isensee2017_model
+
+        model = isensee2017_model(
+            input_shape,
+            depth=4,
+            n_base_filters=8,
+            n_labels=1,
+        )
+        # self.__create_model('isensee2017', input_shape)
         # from keras.models import model_from_json
         # model = model_from_json(structure_path)
         model.load_weights(weight_path)
