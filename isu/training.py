@@ -117,7 +117,8 @@ def training(
         image_dir_path=image_dir_path,
         label_dir_path=label_dir_path,
         cache_image=cache_image,
-        crop_size=(64, 64, 64),
+        #crop_size=(64, 64, 64),
+        crop_size=(128, 128, 128),
         data_count=sample_init + sample_val,
         verbose=verbose)
     sample.load()

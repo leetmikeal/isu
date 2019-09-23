@@ -39,3 +39,23 @@ pip install -e .
 Then, you can use `isu` command.
 
 
+## to use `analyze connection`
+
+`analyze connection` command need to install **pyimagej** modules. If you use Anaconda packaging system, try to follow:
+
+```
+conda install -c conda-forge imagej
+```
+
+follow packages will be installed. But it didn't work in my PC's environment to install by `pip`!!
+```
+imagej
+cython
+imglyb
+pyjnius
+scyjava
+jnius
+```
+
+
+

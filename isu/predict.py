@@ -59,7 +59,6 @@ def prediction(
         application (string): model structure [isensee2017, unet]
         verbose (boolean): output debug information
     """
-    # os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 
     # load images
     sample = SampleSingle(

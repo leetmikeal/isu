@@ -24,6 +24,18 @@ def setup_argument_parser(parser):
     setup_argument_parser(parser_connection)
     parser_connection.set_defaults(handler=command_connection)
 
+    # pxcm
+    def command_pxcm(args):
+        from pxcm import main
+        main(args)
+
+    parser_pxcm = subparsers.add_parser(
+        'pxcm', help='see `-h`')
+    from pxcm import setup_argument_parser
+    # subcommand
+    setup_argument_parser(parser_pxcm)
+    parser_pxcm.set_defaults(handler=command_pxcm)
+
 
 if __name__ == '__main__':
     # setup

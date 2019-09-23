@@ -90,12 +90,16 @@ class SampleSingle():
         self.__set_attributes(boxcell)
 
         # padding
-        x_front = int(math.ceil((400 - self.width) / 2))
-        x_back = int(math.floor((400 - self.width) / 2))
-        y_front = int(math.ceil((400 - self.height) / 2))
-        y_back = int(math.floor((400 - self.height) / 2))
-        z_front = int(math.ceil((400 - self.depth) / 2))
-        z_back = int(math.floor((400 - self.depth) / 2))
+        m = 8
+        x_size = int(math.ceil(self.width / m) * m)
+        x_front = int(math.ceil((x_size - self.width) / 2))
+        x_back = int(math.floor((x_size - self.width) / 2))
+        y_size = int(math.ceil(self.height / m) * m)
+        y_front = int(math.ceil((y_size - self.height) / 2))
+        y_back = int(math.floor((y_size - self.height) / 2))
+        z_size = int(math.ceil(self.depth / m) * m)
+        z_front = int(math.ceil((z_size - self.depth) / 2))
+        z_back = int(math.floor((z_size - self.depth) / 2))
         self.padding_position = (x_front, y_front, z_front)
         #boxcell = np.pad(boxcell, ((x_front, x_back), (y_front, y_back), (z_front, z_back), (0, 0)), 'constant')
         boxcell = np.pad(boxcell, ((x_front, x_back), (y_front, y_back), (z_front, z_back), (0, 0)), 'edge')

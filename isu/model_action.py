@@ -245,15 +245,11 @@ def predict(
     import numpy as np
 
     # cache
+    # result_path = os.path.join(result_dir_path, 'predict.npy')
     # if os.path.exists(result_path):
-    #     df_pred = pd.read_csv(result_path)
-    #     return df_pred
-
-    result_path = os.path.join(result_dir_path, 'predict.npy')
-    if os.path.exists(result_path):
-        pred = np.load(result_path)
-        print('cached predicted : {}'.format(result_path))
-        return pred
+    #     pred = np.load(result_path)
+    #     print('cached predicted : {}'.format(result_path))
+    #     return pred
 
     if verbose:
         print('predicting... : {}'.format(image_unlabeled.shape))
@@ -269,17 +265,7 @@ def predict(
         pred_list.append(pred)
 
     # 実際の予測結果
-    # pred = model.predict(
-    #     image_unlabeled,
-    #     batch_size=batch_size,
-    #     verbose=verbose)
-    # df_pred = pd.DataFrame(np.concatenate(pred_list))
     pred = np.array(pred_list)
-    np.save(result_path, pred)
-
-    # if result_path  != '' and os.path.exists(os.path.dirname(result_path)):
-    #     df_pred.to_csv(result_path, index=False, encoding='utf-8')
-    #     if verbose:
-    #         print('saved result as csv : {}'.format(result_path))
+    # np.save(result_path, pred)
 
     return pred
