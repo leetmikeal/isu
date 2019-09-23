@@ -11,6 +11,7 @@ from tqdm import tqdm
 from utility.save import check_dir
 from core import Model, Sample
 
+
 def setup_argument_parser(parser):
     """
     Set argument
@@ -71,7 +72,6 @@ def setup_argument_parser(parser):
         action='store_true')
 
 
-
 class LearningRateSchedulerConf():
     def __init__(self, init, epoch, step=0.1):
         self.init = init  # initial rate
@@ -79,20 +79,19 @@ class LearningRateSchedulerConf():
         self.step = step  # step rate
 
 
-
 def training(
-    sample_dir, 
-    out_dir, 
-    cache_image, 
-    epochs, 
-    batch_size, 
-    application,
-    sample_init, 
-    sample_val, 
-    lr_init,
-    lr_step,
-    lr_epochs,
-    verbose=False):
+        sample_dir,
+        out_dir,
+        cache_image,
+        epochs,
+        batch_size,
+        application,
+        sample_init,
+        sample_val,
+        lr_init,
+        lr_step,
+        lr_epochs,
+        verbose=False):
     """training and validation
 
     Args:
@@ -113,8 +112,8 @@ def training(
 
     # load images
     sample = Sample(
-        dir_path=sample_dir, 
-        cache_image=cache_image, 
+        dir_path=sample_dir,
+        cache_image=cache_image,
         crop_size=(64, 64, 64),
         data_count=sample_init + sample_val,
         verbose=verbose)
@@ -145,7 +144,7 @@ def training(
         batch_size=batch_size,
         lr=lr,
         verbose=verbose
-        )
+    )
 
     # # debug output
     # if verbose:
@@ -156,7 +155,6 @@ def training(
 
     # save model
     model.save(out_dir)
-
 
     print('completed!')
 
