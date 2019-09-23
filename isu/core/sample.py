@@ -170,14 +170,37 @@ class Sample():
                             size[1], range_z:range_z +
                             size[2], :]
 
-            if (crop_class.max() == 0):
+            do_crop = np.random.rand()
+            th = 0.5
+            if (do_crop > crop_th and crop_class.max() == 0):
                 continue
+
+            do_mirror = np.random.randint(0, 2**3)  # mirror axis bit flag
+            if do_mirror > 0:
+                crop_image = self.__mirror(crop_image, do_mirror)
+                crop_class = self.__mirror(crop_class, do_mirror)
+
 
             crop_image_list.append(crop_image)
             crop_class_list.append(crop_class)
             c += 1
 
         return np.array(crop_image_list), np.array(crop_class_list)
+
+
+    def __mirror(image, mirror_flag):
+        if mirror_flag == 0:
+            return image
+        # mirror_flag is 3 bits
+        # 000 ~ 111
+        # xyz mirror flag each
+        if mirror_flag & 0b001:
+            image = image[::-1,:,:,:]
+        if mirror_flag & 0b010:
+            image = image[:,::-1,:,:]
+        if mirror_flag & 0b100:
+            image = image[:,:,::-1,:]
+        return image
 
     def __load_single_image_from_file(self, path):
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)
