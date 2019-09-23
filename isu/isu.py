@@ -31,6 +31,16 @@ def register_training(parser):
     setup_argument_parser(parser)
     parser.set_defaults(handler=command_training)
 
+def register_predict(parser):
+    from predict import setup_argument_parser
+
+    def command_predict(args):
+        from predict import main
+        main(args)
+
+    setup_argument_parser(parser)
+    parser.set_defaults(handler=command_predict)
+
 
 def register_analyze(parser):
     from analyze.main import setup_argument_parser
@@ -47,6 +57,10 @@ def main():
     # training
     parser_training = subparsers.add_parser('training', help='see `-h`')
     register_training(parser_training)
+
+    # prediction
+    parser_predict = subparsers.add_parser('predict', help='see `-h`')
+    register_predict(parser_predict)
 
     # analyze
     parser_analyze = subparsers.add_parser('analyze', help='see `-h`')
