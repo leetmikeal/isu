@@ -8,7 +8,7 @@ from time import sleep
 
 
 
-import dataset
+# import dataset
 # from model import UNet
 ##import tensorflow as tf
 
@@ -32,6 +32,9 @@ def Process3DOC(ij, open_init_file, savedir, savefile):
     # openfile = unet.pre_path + '/' + unet.dataset + '_RB_0000.tif'
     # savedir = unet.output_path
     # savefile = unet.dataset + '_label_'
+    print('open: {}'.format(open_init_file))
+    print('savedir: {}'.format(savedir))
+    print('savefile: {}'.format(savefile))
     
     
 

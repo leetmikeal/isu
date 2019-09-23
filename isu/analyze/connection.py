@@ -32,7 +32,8 @@ def analyze_connection(in_dir, out_dir, verbose):
     # jnius
     
     # fiji_path = os.path.join(unet.fiji_dir)
-    fiji_path = '/Users/tamaki/Research/isu/work/Fiji.app'
+    #fiji_path = '/Users/tamaki/Research/isu/work/Fiji.app'
+    fiji_path = r'C:\Users\tamaki\Downloads\fiji-win64\Fiji.app'
     # ij = imagej.init(fiji_path, headless=False)
     ij = imagej.init(fiji_path)
     print(ij.getVersion())
@@ -45,7 +46,7 @@ def analyze_connection(in_dir, out_dir, verbose):
     sample_path = os.path.join(in_dir, '0000.tif')
     savedir = out_dir
     savename = 'aaa'
-    Process3DOC(ij, sample_path, svedir, savename)
+    Process3DOC(ij, sample_path, savedir, savename)
 
     if verbose:
         print('completed')
