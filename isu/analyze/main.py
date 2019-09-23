@@ -12,17 +12,17 @@ def setup_argument_parser(parser):
     """
     subparsers = parser.add_subparsers()
 
-    # last_precision
-    def command_last_precision(args):
-        from last_precision import main
+    # connection
+    def command_connection(args):
+        from connection import main
         main(args)
 
-    parser_last_precision = subparsers.add_parser(
-        'last-precision', help='see `-h`')
-    from last_precision import setup_argument_parser
+    parser_connection = subparsers.add_parser(
+        'connection', help='see `-h`')
+    from connection import setup_argument_parser
     # subcommand
-    setup_argument_parser(parser_last_precision)
-    parser_last_precision.set_defaults(handler=command_last_precision)
+    setup_argument_parser(parser_connection)
+    parser_connection.set_defaults(handler=command_connection)
 
 
 if __name__ == '__main__':
