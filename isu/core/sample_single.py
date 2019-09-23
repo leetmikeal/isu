@@ -97,7 +97,8 @@ class SampleSingle():
         z_front = int(math.ceil((400 - self.depth) / 2))
         z_back = int(math.floor((400 - self.depth) / 2))
         self.padding_position = (x_front, y_front, z_front)
-        boxcell = np.pad(boxcell, ((x_front, x_back), (y_front, y_back), (z_front, z_back), (0, 0)), 'constant')
+        #boxcell = np.pad(boxcell, ((x_front, x_back), (y_front, y_back), (z_front, z_back), (0, 0)), 'constant')
+        boxcell = np.pad(boxcell, ((x_front, x_back), (y_front, y_back), (z_front, z_back), (0, 0)), 'edge')
 
         return boxcell
 

@@ -30,6 +30,7 @@ def analyze_connection(in_dir, out_dir, verbose):
     # pyjnius
     # scyjava
     # jnius
+    # conda install -c conda-forge imagej
     
     # fiji_path = os.path.join(unet.fiji_dir)
     fiji_path = '/Users/tamaki/Research/isu/work/Fiji.app'
