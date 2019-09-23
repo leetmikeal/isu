@@ -171,7 +171,7 @@ class Sample():
                             size[2], :]
 
             do_crop = np.random.rand()
-            th = 0.5
+            crop_th = 0.5
             if (do_crop > crop_th and crop_class.max() == 0):
                 continue
 
@@ -188,7 +188,7 @@ class Sample():
         return np.array(crop_image_list), np.array(crop_class_list)
 
 
-    def __mirror(image, mirror_flag):
+    def __mirror(self, image, mirror_flag):
         if mirror_flag == 0:
             return image
         # mirror_flag is 3 bits
