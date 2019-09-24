@@ -19,7 +19,8 @@ alcon12
 
 MASTER=work/label
 #TARGET=work/output_predict_190924
-TARGET=work/output_2d/temp2d
+#TARGET=work/output_2d/temp2d
+TARGET=work/output_ensemble
 
 for L in ${LABELS[@]}; do
     echo ${L}

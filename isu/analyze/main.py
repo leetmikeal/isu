@@ -36,6 +36,18 @@ def setup_argument_parser(parser):
     setup_argument_parser(parser_pxcm)
     parser_pxcm.set_defaults(handler=command_pxcm)
 
+    # ensemble
+    def command_ensemble(args):
+        from ensemble import main
+        main(args)
+
+    parser_ensemble = subparsers.add_parser(
+        'ensemble', help='see `-h`')
+    from ensemble import setup_argument_parser
+    # subcommand
+    setup_argument_parser(parser_ensemble)
+    parser_ensemble.set_defaults(handler=command_ensemble)
+
 
 if __name__ == '__main__':
     # setup
