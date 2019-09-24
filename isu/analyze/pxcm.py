@@ -4,6 +4,7 @@ import os
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
+import cv2
 
 def setup_argument_parser(parser):
     """
@@ -27,16 +28,32 @@ def analyze_pxcm(in_dir1, in_dir2, out_csv, verbose):
 
     tp, fp, fn, tn = count_pixel_confusion_matrix(boxcelll, boxcell2)
 
+    matrix = [[tp, fp], [fn, tn]]
+
+    import pandas as pd
+    df = pd.DataFrame(matrix, columns=['pred_pos', 'pred_neg'], index=['truth_pos', 'truth_neg'])
+    df.to_csv(out_csv)
     
 
 
 def count_pixel_confusion_matrix(box1, box2):
-    if boxl.shape != box2.shape:  # compare full shape
-        raise ValueError('not match shape| {} : {}'.format(boxl.shape, box2.shape))
+    if box1.shape != box2.shape:  # compare full shape
+        raise ValueError('not match shape| {} : {}'.format(box1.shape, box2.shape))
 
     flat1 = box1.flatten()
     flat2 = box2.flatten()
 
+    flat1_nonzero = flat1 != 0
+    flat1_zero = flat1 == 0
+    flat2_nonzero = flat2 != 0
+    flat2_zero = flat2 == 0
+
+    tp = np.sum(np.logical_and(flat1_nonzero, flat2_nonzero))
+    fp = np.sum(np.logical_and(flat1_nonzero, flat2_zero))
+    fn = np.sum(np.logical_and(flat1_zero, flat2_nonzero))
+    tn = np.sum(np.logical_and(flat1_zero, flat2_zero))
+
+    return tp, fp, fn, tn
 
 
 
