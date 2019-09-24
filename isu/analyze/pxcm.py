@@ -64,9 +64,16 @@ def load_image(path, verbose=False):
     image_list = []
     for p in tqdm(glob.glob(os.path.join(path, '*.tif'))):
         img = cv2.imread(p)
-        image_list.append(img)
+        gray_img = np.zeros(img.shape[:2], dtype=np.uint8)
+        gray_img[img[:,:,0] > 0] = 1
+        gray_img[img[:,:,1] > 0] = 1
+        gray_img[img[:,:,2] > 0] = 1
+        gray_img = gray_img.reshape(gray_img.shape + (1,))
+        image_list.append(gray_img)
 
-    return np.array(image_list)
+    # return np.array(image_list)
+    full_array = boxcell = np.concatenate(image_list, axis=2)
+    return full_array
 
 
 
