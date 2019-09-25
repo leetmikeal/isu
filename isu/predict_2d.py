@@ -34,6 +34,8 @@ def predict(in_settings, overwrite_dataset=None, verbose=False):
 
     config = Config(in_settings)
     config.init(overwrite_dataset)
+    if verbose:
+        config.debug()
     model_base = Model2d(config)
     model = model_base.load()
 

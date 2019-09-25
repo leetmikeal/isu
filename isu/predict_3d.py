@@ -127,6 +127,9 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
 def main(args):
     config = Config(args.in_settings)
     config.init(args.dataset)
+    if args.verbose:
+        config.debug()
+
     sample_dir = config.input_path
     model_path = config.model_3d_path
     out_dir = config.temp_3d_dir

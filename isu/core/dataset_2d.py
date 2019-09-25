@@ -151,19 +151,18 @@ class Dataset2d:
             Y270[k, :, :] = np.rot90(Y[k], 3)
         return np.concatenate([X, X90, X180, X270]), np.concatenate([Y, Y90, Y180, Y270])
 
-    def image_save(self, image, fname):
+    def image_save(self, image, dirpath):
         """Save image stack as TIFF files
 
         Parameters
         ----------
         image : numpy array shape = (width, height, number) 
             image stack
-        fname : str
-            filename path of output
+        dirpath : str
+            file saving directory path
 
         """
         for k in range(image.shape[2]):
-            n = ('000' + str(k))[-4:]
-            Image.fromarray(image[:, :, k]).save(fname + n + '.tif')
-
-        return fname + n + '.tif'
+            n = '{:04d}.tif'.format(k)
+            path = os.path.join(dirpath, n)
+            Image.fromarray(image[:, :, k]).save(path)
