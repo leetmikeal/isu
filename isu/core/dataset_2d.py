@@ -19,12 +19,12 @@ class Dataset2d:
         self.classes = classes
 
         
-    def image_read(self, filePath, width, height, feed=True):
+    def image_read(self, file_path, width, height, feed=True):
         """Read tiff images
 
         Parameters
         ----------
-        filePath : str 
+        file_path : str 
             image file path
         width : int
             width of image
@@ -50,7 +50,7 @@ class Dataset2d:
         
         """
         
-        filenames = [img for img in glob.glob(filePath)]
+        filenames = [img for img in glob.glob(file_path)]
         filenames.sort()
         temp = pylab.imread(filenames[0])
         h = len(filenames)

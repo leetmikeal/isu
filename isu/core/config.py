@@ -1,16 +1,9 @@
 # -*- coding: utf-8 -*-
+import configparser
 import glob
 import os
 import sys
 
-import keras
-
-# # adding current dir to lib path
-# mydir = os.path.dirname(os.path.dirname(__file__))
-# sys.path.insert(0, mydir)
-
-import configparser
-import matplotlib.pyplot as plt
 
 class Config():
     def __init__(self, inifile='setting.ini'):
@@ -27,6 +20,8 @@ class Config():
         self.output_dir = self.__to_abs_path(config.get('environment', 'OUTPUT_DIR'))
         self.temp_dir = self.__to_abs_path(config.get('environment', 'TEMP_DIR'))
         self.dataset = config.get('environment', 'DATASET')
+        self.prefix_2d = config.get('environment', 'PREFIX_2D')
+        self.prefix_3d = config.get('environment', 'PREFIX_3D')
 
         # ml basic information
         self.model_2d_path = config.get('ML', 'MODEL2D')
@@ -34,33 +29,29 @@ class Config():
         self.max_size = config.getint('ML', 'MAX_SIZE')
 
         # parameter
-        self.predict_batch_size = config.getint('ML.parameters', 'predict_batch_size')
+        self.predict_2d_batch_size = config.getint('ML.parameters', 'PREDICT_2D_BATCH_SIZE')
         self.ke_init = 'he_normal'
-             
-        # generated config
-        self.input_path = self.__insert_dataset(self.input_dir, self.dataset)
-        self.output_path = self.__insert_dataset(self.output_dir, self.dataset)
-        self.csv_path = self.__insert_dataset(self.input_dir, self.dataset, 'input.csv')
-
 
     def __to_abs_path(self, path):
         if path is None or path == '':
             return path
         return os.path.join(self.__basedir, path)
 
-    def __insert_dataset(self, path, dataset, filename=''):
+    def __insert_dataset(self, path, dataset):
         if dataset is None or dataset == '':
-            if filename is None or filename == '':
-                return path
-            else:
-                return os.path.join(path, filename)
-
+            return path
         else:
-            if filename is None or filename == '':
-                return os.path.join(path, dataset)
-            else:
-                return os.path.join(path, dataset, filename)
+            return os.path.join(path, dataset)
 
+    def init(self, dataset=None):
+        used_dataset = dataset
+        if used_dataset is None:
+            used_dataset = self.dataset
 
+        # generated config
+        self.temp_2d_dir = self.__insert_dataset(os.path.join(self.temp_dir, self.prefix_2d), used_dataset)
+        self.temp_3d_dir = self.__insert_dataset(os.path.join(self.temp_dir, self.prefix_3d), used_dataset)
+        self.input_path = self.__insert_dataset(self.input_dir, used_dataset)
+        self.output_path = self.__insert_dataset(self.output_dir, used_dataset)
 
-
+        self.csv_path = os.path.join(self.__insert_dataset(self.input_dir, used_dataset), 'input.csv')

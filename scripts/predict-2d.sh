@@ -14,9 +14,8 @@ alcon12
 
 for L in ${LABELS[@]}; do
     echo ${L}
-    isu predict-3d \
-        --in-dir work/input/${L} \
-        --in-model work/model3d.h5 \
-        --out-dir work/temp/3d/${L} \
+    isu predict-2d \
+        --in-settings setting.ini \
+        --dataset ${L} \
         --verbose
 done

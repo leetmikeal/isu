@@ -24,38 +24,36 @@ def setup_argument_parser(parser):
         help='set setting file path [settings.ini]',
         required=True)
     parser.add_argument(
+        '--dataset',
+        help='overwrite dataset name in settings.ini by command',
+        default=None)
+    parser.add_argument(
         '--verbose',
         help='output process detail',
         action='store_true')
 
 
-def predict(in_settings, verbose=False):
+def predict(in_settings, overwrite_dataset=None, verbose=False):
     config = Config(in_settings)
+    config.init(overwrite_dataset)
     model_base = Model2d(config)   
     model = model_base.load()
     
     # model = keras.models.load_model(config.model_2d_path, custom_objects={'loss': unet.soft_dice_loss()})
     ds = Dataset2d()
     width, height, imgnum = ds.load_csv(config.csv_path)
-    x_train = ds.image_read(config.input_path+'/*.tif', width, height)
+    x_train = ds.image_read(os.path.join(config.input_path, '*.tif'), width, height)
     x_train_norm, x_width, x_height = reshape(x_train, config.max_size)
 
     if verbose:
         print('x_train_norm:', x_train_norm.shape)
         print(model.summary())
     
-    y_pred = model.predict(x_train_norm, batch_size=config.predict_batch_size, verbose=0)
+    y_pred = model.predict(x_train_norm, batch_size=config.predict_2d_batch_size, verbose=1 if verbose else 0)
     output = postprocess(y_pred, config.max_size, x_width, x_height)
 
-    # if not os.path.exists(config.temp2d_path):
-    #     if not os.path.exists(config.temp_dir):
-    #         os.mkdir(config.temp_dir)
-    #     os.mkdir(config.temp2d_path)
-    # if not os.path.exists(config.pre_path):
-    #     os.mkdir(config.pre_path)
-    # outPath = config.pre_path + '/' + config.dataset + '_temp_'
-    os.makedirs(config.temp_dir, exist_ok=True)
-    ds.image_save(output, config.temp_dir)
+    os.makedirs(config.temp_2d_dir, exist_ok=True)
+    ds.image_save(output, config.temp_2d_dir)
 
 
 def reshape(x_train, size):
@@ -79,6 +77,7 @@ def postprocess(y_pred, size, width, height):
 def main(args):
     predict(
         in_settings=args.in_settings,
+        overwrite_dataset=args.dataset,
         verbose=args.verbose
     )
 
