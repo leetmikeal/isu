@@ -23,6 +23,7 @@ def iter_train_batch(image_list, label_list, batch_size):
         label_batch = label_list[start:min(start + batch_size, total)]
         yield image_batch, label_batch
 
+
 def iter_batch(image_list, batch_size):
     total = len(image_list)
     for start in range(0, total, batch_size):
@@ -100,7 +101,7 @@ def train(
                 class_weight=class_weight)
 
             # result
-            num_image = image_batch.shape[0]
+            # num_image = image_batch.shape[0]
             train_batch_returns.append(batch_return)
             # loss_sum += loss * num_image
 
@@ -116,13 +117,13 @@ def train(
             #                                             acc_sum=acc_sum,
             #                                             num_image_total=num_image_total,
             #                                             )
-        num_train_image_total = image_training_shuffle.shape[0]
+        # num_train_image_total = image_training_shuffle.shape[0]
         # train_loss = loss_sum / num_image_total
 
         # Validation after batch loop
         validate_batch_returns = []
         validate_generator = tqdm(
-            iterable=iter_train_batch(image_validation, label_validation, batch_size), 
+            iterable=iter_train_batch(image_validation, label_validation, batch_size),
             total=math.ceil(image_validation.shape[0] / batch_size))
         for j, [image_batch, label_batch] in enumerate(validate_generator):
 
@@ -130,11 +131,11 @@ def train(
             batch_return = model.test_on_batch(x=image_batch, y=label_batch)
 
             # result
-            num_image = image_batch.shape[0]
+            # num_image = image_batch.shape[0]
             # loss_sum += loss * num_image
             validate_batch_returns.append(batch_return)
 
-        num_val_image_total = image_validation.shape[0]
+        # num_val_image_total = image_validation.shape[0]
         # val_loss = loss_sum / num_image_total
         # print_batch_end_time_training_validation(val_loss=val_loss, val_acc=val_acc)
         # all batches end
@@ -170,58 +171,6 @@ def train(
 
 
 
-def validate(model, batch_size, verbose, source_image, result_path):
-    import pandas as pd
-
-    # 画像リストの読み込み
-    df_definition_validate = source_image.extract('validation')
-    if len(df_definition_validate) == 0:
-        print('validation image is not found. {}'.format(source_image.path))
-        sys.exit(1)
-
-    # 画像の読み込み
-    from utility.image import iter_cache_batch, load_batch
-    predict_results = []
-    size = model.input_shape[1:3]
-    # channel = model.input_shape[3]
-    classes = source_image.classes
-
-    for i, rows in enumerate(
-            iter_cache_batch(
-            df_definition_validate, batch_size)):
-
-        np_image, np_label = load_batch(rows, classes, size)
-        # 実際の予測結果
-        pred = model.predict(np_image, verbose=verbose, steps=1)
-        predict_results.extend(pred)
-
-    df_pred = pd.DataFrame(predict_results)
-    # row_name_class_number = df_pred.columns.values
-
-    # top-1のラベルの番号(0 start)を取得する
-    df_pred.columns = list(range(len(classes)))  # 一時的に配列を使用する(0 start)
-    series_validation = df_pred.idxmax(axis=1)  # series_validation
-    series_validation.name = 'validation'
-    df_pred.columns = classes  # csvのヘッダーには元のラベル名を使用する
-
-    # 複数pathは1行にして保持する
-    df_definition_validate_path = df_definition_validate.loc[:, 'path'].apply(
-        lambda l: '|'.join(l))
-
-    # 正解のラベルの番号(0 start)を取得する
-    df_definition_validate_class = df_definition_validate.loc[:, classes]
-    df_definition_validate_class.columns = list(range(len(classes)))
-    series_answer = df_definition_validate_class.idxmax(
-        axis=1)  # series_answer
-    series_answer.name = 'answer'
-
-    df_result = pd.concat([df_definition_validate_path,
-                           df_pred, series_validation, series_answer], axis=1)
-    df_result.to_csv(result_path, index=False, encoding='utf-8')
-
-    print('validation finished')
-
-
 def predict(
         model,
         image_unlabeled,
@@ -229,19 +178,18 @@ def predict(
         batch_size=32,
         verbose=False):
     """predict
-    
+
     Args:
         model (keras model): keras model
         image_unlabeled (numpy.array): 4 dimension numpy array [image_count, width, height, channel]
         result_dir_path (string, optional): saving result path (*.csv)
         batch_size (int, optional): predict batchsize
         verbose (bool, optional): output debug information. Defaults to False.
-    
+
     Returns:
         [type]: [description]
     """
 
-    import pandas as pd
     import numpy as np
 
     # cache

@@ -79,7 +79,7 @@ def predict(
     # create model
     model = Model3d.from_file(
         path=model_path,
-        batch_size=batch_size,
+        batch_size=1,
         input_shape=sample.input_shape(),
         verbose=verbose
     )

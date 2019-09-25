@@ -14,6 +14,7 @@ from model.unet3d_metrics import (dice_coefficient, dice_coefficient_loss,
                                   weighted_dice_coefficient_loss)
 from utility.save import check_dir
 
+
 class Model3d():
     def __init__(
             self,
@@ -32,11 +33,7 @@ class Model3d():
         self.lr = lr
         self.verbose = verbose
 
-        if (application is None 
-                and input_shape is None 
-                and epochs is None 
-                and batch_size is None 
-                and initial_weight is None):
+        if (application is None and input_shape is None and epochs is None and batch_size is None and initial_weight is None):
             return
 
         self.__create_model(self.application, self.input_shape)
@@ -124,8 +121,7 @@ class Model3d():
             metrics = [metrics]
 
         if include_label_wise_dice_coefficients and n_labels > 1:
-            label_wise_dice_metrics = [
-                get_label_dice_coefficient_function(index) for index in range(n_labels)]
+            label_wise_dice_metrics = [get_label_dice_coefficient_function(index) for index in range(n_labels)]
             if metrics:
                 metrics = metrics + label_wise_dice_metrics
             else:
@@ -139,10 +135,9 @@ class Model3d():
             metrics=metrics)
         # model.compile(optimizer=Adam(lr=initial_learning_rate, epsilon=None), loss='binary_crossentropy')
 
-
     def __load_weight(self, initial_weight):
         """load weight from file
-        
+
         Args:
             initial_weight (string): initial weight path
         """
@@ -152,7 +147,6 @@ class Model3d():
         self.model.load_weights(initial_weight)
         if self.verbose:
             print('loaded initial weight | {}'.format(initial_weight))
-
 
     def train(self, sample, out_dir):
         """training
@@ -170,7 +164,7 @@ class Model3d():
         #     class_train,
         #     self.batch_size,
         # )
-        from model_action import train as model_train
+        from model.model_action import train as model_train
 
         # self.model.fit(
         #     x=sample.image_train,
@@ -207,16 +201,12 @@ class Model3d():
         for i in tqdm(range(data.shape[0])):
             for j in range(data.shape[1]):
                 image = ((data[i, j, :, :, 0] + 0.5) * 255.0).astype(np.uint8)
-                path = os.path.join(
-                    save_dir,
-                    'image_{:05d}_{:04d}.png'.format(
-                        i,
-                        j))
+                path = os.path.join(save_dir, 'image_{:05d}_{:04d}.png'.format(i, j))
                 cv2.imwrite(image, path)
 
     def predict(self, image_unlabeled, out_dir):
 
-        from model_action import predict as model_predict
+        from model.model_action import predict as model_predict
 
         result = model_predict(
             self.model,
@@ -303,6 +293,3 @@ class Model3d():
         new_model.batch_size = batch_size
         new_model.verbose = verbose
         return new_model
-
-
-        
