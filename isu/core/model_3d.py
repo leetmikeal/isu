@@ -14,7 +14,6 @@ from model.unet3d_metrics import (dice_coefficient, dice_coefficient_loss,
                                   weighted_dice_coefficient_loss)
 from utility.save import check_dir
 
-
 class Model3d():
     def __init__(
             self,
@@ -279,10 +278,10 @@ class Model3d():
     @staticmethod
     def from_file(path, batch_size, input_shape, verbose=False):
         basepath = os.path.join(os.path.dirname(path), os.path.splitext(os.path.basename(path))[0])
-        structure_path = basepath + '.json'
+        # structure_path = basepath + '.json'
         weight_path = basepath + '.h5'
-        if not os.path.exists(structure_path):
-            raise ValueError('file was not found : {}'.format(structure_path))
+        # if not os.path.exists(structure_path):
+        #     raise ValueError('file was not found : {}'.format(structure_path))
         if not os.path.exists(weight_path):
             raise ValueError('file was not found : {}'.format(weight_path))
 
@@ -299,7 +298,7 @@ class Model3d():
         # model = model_from_json(structure_path)
         model.load_weights(weight_path)
 
-        new_model = Model(None, None, None, None, None)
+        new_model = Model3d(None, None, None, None, None)
         new_model.model = model
         new_model.batch_size = batch_size
         new_model.verbose = verbose

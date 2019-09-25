@@ -8,8 +8,7 @@ import keras
 import numpy as np
 from tqdm import tqdm
 
-from utility.save import check_dir
-from core import Model3d, SampleSingle
+from core import Config, Model3d, SampleSingle
 
 
 def setup_argument_parser(parser):
@@ -17,22 +16,13 @@ def setup_argument_parser(parser):
     Set argument
     """
     parser.add_argument(
-        '--in-dir',
-        help='source directory path',
+        '--in-settings',
+        help='set setting file path [settings.ini]',
         required=True)
     parser.add_argument(
-        '--in-model',
-        help='sorce model file(*.h5|*.json) path',
-        required=True)
-    parser.add_argument(
-        '--out-dir',
-        help='output files save directory path',
-        required=True)
-    parser.add_argument(
-        '--batch-size',
-        help='batch size',
-        type=int,
-        default=1)
+        '--dataset',
+        help='overwrite dataset name in settings.ini by command',
+        default=None)
     parser.add_argument(
         '--application',
         help='deep learning structure [isensee2017, unet]',
@@ -59,6 +49,11 @@ def predict(
         application (string): model structure [isensee2017, unet]
         verbose (boolean): output debug information
     """
+
+    import tensorflow as tf
+    config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True, per_process_gpu_memory_fraction=0.8))
+    session = tf.Session(config=config)
+    keras.backend.tensorflow_backend.set_session(session)
 
     # load images
     sample = SampleSingle(
@@ -130,11 +125,18 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
 
 
 def main(args):
+    config = Config(args.in_settings)
+    config.init(args.dataset)
+    sample_dir = config.input_path
+    model_path = config.model_3d_path
+    out_dir = config.output_path
+    batch_size = config.predict_3d_batch_size
+
     predict(
-        sample_dir=args.in_dir,
-        model_path=args.in_model,
-        out_dir=args.out_dir,
-        batch_size=args.batch_size,
+        sample_dir=sample_dir,
+        model_path=model_path,
+        out_dir=out_dir,
+        batch_size=batch_size,
         application=args.application,
         verbose=args.verbose
     )

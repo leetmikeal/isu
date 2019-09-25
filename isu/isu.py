@@ -5,7 +5,7 @@ import sys
 import re
 import ast
 
-# os.environ["CUDA_VISIBLE_DEVICES"] = "0"
+os.environ["CUDA_VISIBLE_DEVICES"] = "-1"
 # from src import get_module_logger
 # logger = get_module_logger(__name__)
 # logger.debug("test")

@@ -4,16 +4,8 @@ import os
 import keras
 import matplotlib.pyplot as plt
 import numpy as np
-import tensorflow as tf
 
-from core import Dataset2d
-from core import Config
-from core import Model2d
-
-config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True, per_process_gpu_memory_fraction=0.8))
-session = tf.Session(config=config)
-keras.backend.tensorflow_backend.set_session(session)
-
+from core import Config, Dataset2d, Model2d
 
 def setup_argument_parser(parser):
     """
@@ -34,6 +26,11 @@ def setup_argument_parser(parser):
 
 
 def predict(in_settings, overwrite_dataset=None, verbose=False):
+    import tensorflow as tf
+    config = tf.ConfigProto(gpu_options=tf.GPUOptions(allow_growth=True, per_process_gpu_memory_fraction=0.8))
+    session = tf.Session(config=config)
+    keras.backend.tensorflow_backend.set_session(session)
+
     config = Config(in_settings)
     config.init(overwrite_dataset)
     model_base = Model2d(config)   
@@ -41,7 +38,7 @@ def predict(in_settings, overwrite_dataset=None, verbose=False):
     
     # model = keras.models.load_model(config.model_2d_path, custom_objects={'loss': unet.soft_dice_loss()})
     ds = Dataset2d()
-    width, height, imgnum = ds.load_csv(config.csv_path)
+    width, height, imgnum = ds.load_csv(os.path.join(config.input_path, 'input.csv'))
     x_train = ds.image_read(os.path.join(config.input_path, '*.tif'), width, height)
     x_train_norm, x_width, x_height = reshape(x_train, config.max_size)
 

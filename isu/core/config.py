@@ -29,7 +29,8 @@ class Config():
         self.max_size = config.getint('ML', 'MAX_SIZE')
 
         # parameter
-        self.predict_2d_batch_size = config.getint('ML.parameters', 'PREDICT_2D_BATCH_SIZE')
+        self.predict_2d_batch_size = config.getint('ML', 'PREDICT_2D_BATCH_SIZE')
+        self.predict_3d_batch_size = config.getint('ML', 'PREDICT_3D_BATCH_SIZE')
         self.ke_init = 'he_normal'
 
     def __to_abs_path(self, path):
@@ -53,5 +54,3 @@ class Config():
         self.temp_3d_dir = self.__insert_dataset(os.path.join(self.temp_dir, self.prefix_3d), used_dataset)
         self.input_path = self.__insert_dataset(self.input_dir, used_dataset)
         self.output_path = self.__insert_dataset(self.output_dir, used_dataset)
-
-        self.csv_path = os.path.join(self.__insert_dataset(self.input_dir, used_dataset), 'input.csv')
