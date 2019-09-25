@@ -21,13 +21,14 @@ class Model2d():   # UNet
         self.config = config
 
 
-    def load(self):
-        model = self.build()
-        model.load_weights(self.config.model_2d_path)
+    def load(self, input_shape = (400,400,1)):
+        model = self.build(input_shape)
+        if self.config.model_2d_path is not None:
+            model.load_weights(self.config.model_2d_path)
         return model
 
 
-    def build(self, pretrained_weights = None, input_shape = (400,400,1)):
+    def build(self, input_shape = (400,400,1)):
         inputs = Input(shape=input_shape)
         conv1 = Conv2D(64, 3, padding = 'same', kernel_initializer = self.config.ke_init)(inputs)
         conv1 = BatchNormalization()(conv1)

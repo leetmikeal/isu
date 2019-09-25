@@ -72,6 +72,7 @@ class Config():
         print('max_size : {}'.format(self.max_size))
         print('predict_2d_batch_size : {}'.format(self.predict_2d_batch_size))
         print('predict_3d_batch_size : {}'.format(self.predict_3d_batch_size))
+        print('predict_3d_crop_size : {}'.format(self.predict_3d_crop_size))
         print('ke_init : {}'.format(self.ke_init))
         print('')
         print('temp_2d_dir : {}'.format(self.temp_2d_dir))
