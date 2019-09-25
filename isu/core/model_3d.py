@@ -15,7 +15,7 @@ from model.unet3d_metrics import (dice_coefficient, dice_coefficient_loss,
 from utility.save import check_dir
 
 
-class Model():
+class Model3d():
     def __init__(
             self,
             application,

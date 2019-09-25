@@ -5,7 +5,7 @@ import glob
 import numpy as np
 from PIL import Image
 
-class Dataset:
+class Dataset2d:
     """ Dataset Class
 
     Parameters

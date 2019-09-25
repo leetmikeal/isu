@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 from utility.save import check_dir
-from core import Model, SampleSingle
+from core import Model3d, SampleSingle
 
 
 def setup_argument_parser(parser):
@@ -43,7 +43,7 @@ def setup_argument_parser(parser):
         action='store_true')
 
 
-def prediction(
+def predict(
         sample_dir,
         model_path,
         out_dir,
@@ -83,7 +83,7 @@ def prediction(
     # )
 
     # create model
-    model = Model.from_file(
+    model = Model3d.from_file(
         path=model_path,
         batch_size=batch_size,
         input_shape=sample.input_shape(),
@@ -132,7 +132,7 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
 
 
 def main(args):
-    prediction(
+    predict(
         sample_dir=args.in_dir,
         model_path=args.in_model,
         out_dir=args.out_dir,

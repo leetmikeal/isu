@@ -22,25 +22,45 @@ mydir = os.path.dirname(__file__)
 sys.path.insert(0, mydir)
 
 
-def register_training(parser):
-    from training import setup_argument_parser
+def register_training_2d(parser):
+    from training_2d import setup_argument_parser
 
-    def command_training(args):
-        from training import main
+    def command_training_2d(args):
+        from training_2d import main
         main(args)
 
     setup_argument_parser(parser)
-    parser.set_defaults(handler=command_training)
+    parser.set_defaults(handler=command_training_2d)
 
-def register_predict(parser):
-    from predict import setup_argument_parser
+def register_predict_2d(parser):
+    from predict_2d import setup_argument_parser
 
-    def command_predict(args):
-        from predict import main
+    def command_predict_2d(args):
+        from predict_2d import main
         main(args)
 
     setup_argument_parser(parser)
-    parser.set_defaults(handler=command_predict)
+    parser.set_defaults(handler=command_predict_2d)
+
+def register_training_3d(parser):
+    from training_3d import setup_argument_parser
+
+    def command_training_3d(args):
+        from training_3d import main
+        main(args)
+
+    setup_argument_parser(parser)
+    parser.set_defaults(handler=command_training_3d)
+
+def register_predict_3d(parser):
+    from predict_3d import setup_argument_parser
+
+    def command_predict_3d(args):
+        from predict_3d import main
+        main(args)
+
+    setup_argument_parser(parser)
+    parser.set_defaults(handler=command_predict_3d)
 
 
 def register_analyze(parser):
@@ -55,13 +75,21 @@ def main():
     parser.add_argument('--version', action='version', version='%(prog)s ' + version)
     subparsers = parser.add_subparsers()
 
-    # training
-    parser_training = subparsers.add_parser('training', help='see `-h`')
-    register_training(parser_training)
+    # training_2d
+    parser_training_2d = subparsers.add_parser('training-2d', help='see `-h`')
+    register_training_2d(parser_training_2d)
 
-    # prediction
-    parser_predict = subparsers.add_parser('predict', help='see `-h`')
-    register_predict(parser_predict)
+    # predict_2d
+    parser_predict_2d = subparsers.add_parser('predict-2d', help='see `-h`')
+    register_predict_2d(parser_predict_2d)
+
+    # training_3d
+    parser_training_3d = subparsers.add_parser('training-3d', help='see `-h`')
+    register_training_3d(parser_training_3d)
+
+    # predict_3d
+    parser_predict_3d = subparsers.add_parser('predict-3d', help='see `-h`')
+    register_predict_3d(parser_predict_3d)
 
     # analyze
     parser_analyze = subparsers.add_parser('analyze', help='see `-h`')

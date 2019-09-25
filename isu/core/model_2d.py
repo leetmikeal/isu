@@ -1,42 +1,24 @@
-import numpy as np 
 import os
+import sys
+
+import matplotlib.pyplot as plt
+import numpy as np
 import skimage.io as io
 import skimage.transform as trans
-import numpy as np
-from keras.models import *
-from keras.layers import *
-from keras.optimizers import *
-from keras.callbacks import ModelCheckpoint, LearningRateScheduler
 from keras import backend as keras
+from keras.callbacks import LearningRateScheduler, ModelCheckpoint
+from keras.layers import *
+from keras.models import *
+from keras.optimizers import *
 
-import configparser
-import matplotlib.pyplot as plt
+# adding current dir to lib path
+mydir = os.path.dirname(os.path.dirname(__file__))
+sys.path.insert(0, mydir)
 
-class UNet():
-    def __init__(self, inifile='setting.ini'):
-        config = configparser.SafeConfigParser()
-        config.read(inifile)
+class Model2d():   # UNet
+    def __init__(self, config):
+        self.config = config
 
-        self.fiji_dir = config.get('environment', 'FIJI_DIR')
-        self.input_dir = config.get('environment', 'INPUT_DIR')
-        self.output_dir = config.get('environment', 'OUTPUT_DIR')
-        self.temp_dir = config.get('environment', 'TEMP_DIR')
-        self.dataset = config.get('environment', 'DATASET')
-        self.model_name = config.get('ML', 'MODEL2D_NAME')
-        self.max_size = config.getint('ML', 'MAX_SIZE')
-        self.predict_batch_size = config.getint('ML.parameters', 'predict_batch_size')
-             
-        self.input_path = self.input_dir + self.dataset
-        self.output_path = self.output_dir + self.dataset
-        self.temp2d_path = self.temp_dir + 'temp2d/'
-        self.pre_path = self.temp2d_path + self.dataset
-        self.temp3d_path = self.temp_dir + 'temp3d/' + self.dataset
-        self.ensemble_path = self.temp_dir + 'ensemble/'
-        self.temp_path = self.ensemble_path + self.dataset
-        self.csv_path = self.input_dir + self.dataset + '/input.csv'
-        self.ke_init = 'he_normal'
-
-        
     def build(self, pretrained_weights = None, input_shape = (400,400,1)):
         inputs = Input(shape=input_shape)
         conv1 = Conv2D(64, 3, padding = 'same', kernel_initializer = self.ke_init)(inputs)

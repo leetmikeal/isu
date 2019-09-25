@@ -9,7 +9,7 @@ import numpy as np
 from tqdm import tqdm
 
 from utility.save import check_dir
-from core import Model, Sample
+from core import Model3d, Sample
 
 
 def setup_argument_parser(parser):
@@ -154,7 +154,7 @@ def training(
     )
 
     # create model
-    model = Model(
+    model = Model3d(
         application=application,
         input_shape=sample.input_shape(),
         initial_weight=initial_weight,
