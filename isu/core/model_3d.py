@@ -219,7 +219,7 @@ class Model3d():
         )
         return result
 
-    def predict_crop(self, box, out_dir, crop_size=64, overlap=8):
+    def predict_crop(self, box, out_dir, crop_size=128, overlap=16):
         shift_size = crop_size - overlap
 
         box_ranges = []

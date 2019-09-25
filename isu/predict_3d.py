@@ -39,6 +39,7 @@ def predict(
         out_dir,
         batch_size,
         crop_size,
+        overlap,
         application,
         verbose=False):
     """training and validation
@@ -93,7 +94,7 @@ def predict(
     # training
     # input_sample = np.array([sample.image])
     # result = model.predict(input_sample, out_dir)
-    result = model.predict_crop(sample.image, out_dir, crop_size)
+    result = model.predict_crop(sample.image, out_dir, crop_size, overlap)
 
     # # save model
     # result.save(out_dir)
@@ -135,6 +136,7 @@ def main(args):
     out_dir = config.temp_3d_dir
     batch_size = config.predict_3d_batch_size
     crop_size = config.predict_3d_crop_size
+    overlap = config.predict_3d_overlap
 
     predict(
         sample_dir=sample_dir,
@@ -142,6 +144,7 @@ def main(args):
         out_dir=out_dir,
         batch_size=batch_size,
         crop_size=crop_size,
+        overlap=overlap,
         application=args.application,
         verbose=args.verbose
     )

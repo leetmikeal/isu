@@ -30,9 +30,10 @@ class Config():
 
         # parameter
         self.predict_2d_batch_size = config.getint('ML', 'PREDICT_2D_BATCH_SIZE')
+        self.ke_init = 'he_normal'
         self.predict_3d_batch_size = config.getint('ML', 'PREDICT_3D_BATCH_SIZE')
         self.predict_3d_crop_size = config.getint('ML', 'PREDICT_3D_CROP_SIZE')
-        self.ke_init = 'he_normal'
+        self.predict_3d_overlap = config.getint('ML', 'PREDICT_3D_OVERLAP')
 
     def __to_abs_path(self, path):
         if path is None or path == '':
@@ -73,6 +74,7 @@ class Config():
         print('predict_2d_batch_size : {}'.format(self.predict_2d_batch_size))
         print('predict_3d_batch_size : {}'.format(self.predict_3d_batch_size))
         print('predict_3d_crop_size : {}'.format(self.predict_3d_crop_size))
+        print('predict_3d_overlap : {}'.format(self.predict_3d_overlap))
         print('ke_init : {}'.format(self.ke_init))
         print('')
         print('temp_2d_dir : {}'.format(self.temp_2d_dir))
