@@ -1,25 +1,33 @@
 import glob
 import os
 
+import cv2
 import numpy as np
 import pandas as pd
 from tqdm import tqdm
 
 import cc3d
-import cv2
+from core import Config
 
 
 def setup_argument_parser(parser):
     """
     Set argument
     """
-    parser.add_argument('--in-dir', help='image contained directory path', required=True)
-    parser.add_argument('--out-dir', help='path', required=True)
+    parser.add_argument(
+        '--in-settings',
+        help='set setting file path [settings.ini]',
+        required=True)
+    parser.add_argument(
+        '--dataset',
+        help='overwrite dataset name in settings.ini by command',
+        default=None)
+    # parser.add_argument('--in-dir', help='image contained directory path', required=True)
+    # parser.add_argument('--out-dir', help='path', required=True)
     parser.add_argument('--in-filename', help='filename', default='*.tif')
     parser.add_argument('--connectivity', help='neighbor search area in 3d box. [26, 18, 6]', type=int, default=6)
     parser.add_argument('--stat', help='statistics information saving file path')
     parser.add_argument('--verbose', help='output process detail', action='store_true')
-
 
 
 def analyze_connection(in_dir, out_dir, in_filename='*.tif', connectivity=6, stat=None, verbose=False):
@@ -46,6 +54,7 @@ def analyze_connection(in_dir, out_dir, in_filename='*.tif', connectivity=6, sta
     if verbose:
         print('completed')
 
+
 def process_stat(connected, path, verbose=False):
     # prepare directory
     parent_dir = os.path.dirname(path)
@@ -67,7 +76,6 @@ def process_stat(connected, path, verbose=False):
             print('{:>5d} : {}'.format(i, v))
 
 
-    
 def get_stat(connected):
     n_region = connected.max()
 
@@ -82,21 +90,20 @@ def get_stat(connected):
 
     volumes = sr.tolist()[1:]
 
-
     return n_region, volumes
 
 
 def load_box(path, filename, verbose=False):
     if verbose:
         print('image loading. | {}'.format(path))
-    
+
     image_list = []
     for p in tqdm(glob.glob(os.path.join(path, filename))):
         img = cv2.imread(p)
         gray_img = np.zeros(img.shape[:2], dtype=np.uint8)
-        gray_img[img[:,:,0] > 0] = 1
-        gray_img[img[:,:,1] > 0] = 1
-        gray_img[img[:,:,2] > 0] = 1
+        gray_img[img[:, :, 0] > 0] = 1
+        gray_img[img[:, :, 1] > 0] = 1
+        gray_img[img[:, :, 2] > 0] = 1
         gray_img = gray_img.reshape(gray_img.shape + (1,))
         image_list.append(gray_img)
 
@@ -107,16 +114,17 @@ def load_box(path, filename, verbose=False):
     boxcell = np.concatenate(image_list, axis=2)
     return boxcell
 
+
 def save_box(box, out_dir, verbose=False):
     """Save image stack as TIFF files
 
     Parameters
     ----------
-    box : numpy array shape = (width, height, number) 
+    box : numpy array shape = (width, height, number)
         image stack
     out_dir : str
         filename path of output
-    
+
     """
     for k in tqdm(range(box.shape[2]), disable=(not verbose)):
         b = box[:, :, k]
@@ -126,6 +134,7 @@ def save_box(box, out_dir, verbose=False):
         path = os.path.join(out_dir, '{:04d}.tif'.format(k))
         cv2.imwrite(path, img)
 
+
 def convert_color_box(img32):
     r = pickup_byte0(img32, 0)
     g = pickup_byte1(img32, 1)
@@ -133,9 +142,11 @@ def convert_color_box(img32):
     img = np.concatenate((b, g, r), axis=2)
     return img
 
+
 def pickup_byte0(img32, channel):
     arr = img32.astype(np.uint8).reshape(img32.shape + (1,))
     return arr
+
 
 def pickup_byte1(img32, channel):
     def shift(b):
@@ -147,6 +158,7 @@ def pickup_byte1(img32, channel):
     arr = arr.astype(np.uint8).reshape(img32.shape + (1,))
     return arr
 
+
 def pickup_byte2(img32, channel):
     def shift(b):
         return b >> 16
@@ -156,17 +168,24 @@ def pickup_byte2(img32, channel):
     arr = f(flat)
     arr = arr.astype(np.uint8).reshape(img32.shape + (1,))
     return arr
-    
-
 
 
 def main(args):
+    config = Config(args.in_settings)
+    config.init(args.dataset)
+    if args.verbose:
+        config.debug()
+
+    in_dir = config.temp_ensemble_dir
+    out_dir = config.output_path
+    connectivity = config.ensemble_connectivity
+
     analyze_connection(
-        in_dir=args.in_dir,
-        out_dir=args.out_dir,
+        in_dir=in_dir,
+        out_dir=out_dir,
         in_filename=args.in_filename,
         stat=args.stat,
-        connectivity=args.connectivity,
+        connectivity=connectivity,
         verbose=args.verbose
     )
 

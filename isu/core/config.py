@@ -22,6 +22,7 @@ class Config():
         self.dataset = config.get('environment', 'DATASET')
         self.prefix_2d = config.get('environment', 'PREFIX_2D')
         self.prefix_3d = config.get('environment', 'PREFIX_3D')
+        self.prefix_ensemble = config.get('environment', 'PREFIX_ENSEMBLE')
 
         # ml basic information
         self.model_2d_path = config.get('ML', 'MODEL2D')
@@ -34,6 +35,7 @@ class Config():
         self.predict_3d_batch_size = config.getint('ML', 'PREDICT_3D_BATCH_SIZE')
         self.predict_3d_crop_size = config.getint('ML', 'PREDICT_3D_CROP_SIZE')
         self.predict_3d_overlap = config.getint('ML', 'PREDICT_3D_OVERLAP')
+        self.ensemble_connectivity = config.getint('ML', 'ENSEMBLE_CONNECTIVITY')
 
     def __to_abs_path(self, path):
         if path is None or path == '':
@@ -54,6 +56,7 @@ class Config():
         # generated config
         self.temp_2d_dir = self.__insert_dataset(os.path.join(self.temp_dir, self.prefix_2d), used_dataset)
         self.temp_3d_dir = self.__insert_dataset(os.path.join(self.temp_dir, self.prefix_3d), used_dataset)
+        self.temp_ensemble_dir = self.__insert_dataset(os.path.join(self.temp_dir, self.prefix_ensemble), used_dataset)
         self.input_path = self.__insert_dataset(self.input_dir, used_dataset)
         self.output_path = self.__insert_dataset(self.output_dir, used_dataset)
 
@@ -67,6 +70,7 @@ class Config():
         print('dataset : {}'.format(self.dataset))
         print('prefix_2d : {}'.format(self.prefix_2d))
         print('prefix_3d : {}'.format(self.prefix_3d))
+        print('prefix_ensemble : {}'.format(self.prefix_ensemble))
         print('')
         print('model_2d_path : {}'.format(self.model_2d_path))
         print('model_3d_path : {}'.format(self.model_3d_path))
@@ -79,5 +83,6 @@ class Config():
         print('')
         print('temp_2d_dir : {}'.format(self.temp_2d_dir))
         print('temp_3d_dir : {}'.format(self.temp_3d_dir))
+        print('temp_ensemble_dir : {}'.format(self.temp_ensemble_dir))
         print('input_path : {}'.format(self.input_path))
         print('output_path : {}'.format(self.output_path))

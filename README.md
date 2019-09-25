@@ -45,23 +45,18 @@ pip install -r requirements.txt
 Then, you can use `isu` command or `python isu/isu.py`.
 
 
-## to use `analyze connection`
+## execution
 
-`analyze connection` command need to install **pyimagej** modules. If you use Anaconda packaging system, try to follow:
+see `scripts/predict.sh`
 
-```
-conda install -c conda-forge imagej
-```
+4 steps:
 
-follow packages will be installed. But it didn't work in my PC's environment to install by `pip`!!
-```
-imagej
-cython
-imglyb
-pyjnius
-scyjava
-jnius
-```
+ - predict from 2D model by `isu predict-2d`
+ - predict from 3D model by `isu predict-3d`
+ - make ensemble result by `isu analyze ensemble`
+ - blob process by `isu analyze connection`
 
 
+## settings
 
+Some parameter can changed in each environment to edit `setting.ini`.

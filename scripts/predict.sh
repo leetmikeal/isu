@@ -19,14 +19,12 @@ for L in ${LABELS[@]}; do
         --dataset ${L} \
         --verbose
     isu analyze ensemble \
-        --in-dir1 work/temp/2d/${L} \
-        --in-dir2 work/temp/3d/${L} \
-        --out-dir work/temp/ensemble/${L} \
+        --in-settings setting.ini \
+        --dataset ${L} \
         --verbose
     isu analyze connection \
-        --in-dir work/temp/ensemble/${L} \
-        --out-dir work/output/${L} \
-        --in-filename *.tif \
-        --stat work/output/${L}_stat.log \
+        --in-settings setting.ini \
+        --dataset ${L} \
         --verbose
+        
 done

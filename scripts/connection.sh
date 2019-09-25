@@ -15,9 +15,7 @@ alcon12
 for L in ${LABELS[@]}; do
     echo ${L}
     isu analyze connection \
-        --in-dir work/temp/ensemble/${L} \
-        --out-dir work/output/${L} \
-        --in-filename *.tif \
-        --stat work/output/${L}_stat.log \
+        --in-settings setting.ini \
+        --dataset ${L} \
         --verbose
 done

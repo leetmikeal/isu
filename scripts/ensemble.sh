@@ -15,8 +15,7 @@ alcon12
 for L in ${LABELS[@]}; do
     echo ${L}
     isu analyze ensemble \
-        --in-dir1 work/temp/2d/${L} \
-        --in-dir2 work/temp/3d/${L} \
-        --out-dir work/temp/ensemble/${L} \
+        --in-settings setting.ini \
+        --dataset ${L} \
         --verbose
 done
