@@ -219,18 +219,21 @@ class Model3d():
         )
         return result
 
-    def predict_crop(self, box, out_dir, crop_size):
+    def predict_crop(self, box, out_dir, crop_size=64, overlap=8):
+        shift_size = crop_size - overlap
 
         box_ranges = []
-        for iz in range(int(math.ceil(box.shape[2] / crop_size))):
-            for iy in range(int(math.ceil(box.shape[1] / crop_size))):
-                for ix in range(int(math.ceil(box.shape[0] / crop_size))):
-                    x_start = ix * crop_size
-                    x_end = min((ix + 1) * crop_size, box.shape[0])
-                    y_start = iy * crop_size
-                    y_end = min((iy + 1) * crop_size, box.shape[1])
-                    z_start = iz * crop_size
-                    z_end = min((iz + 1) * crop_size, box.shape[2])
+        for iz in range(int(math.ceil(box.shape[2] / shift_size))):
+            for iy in range(int(math.ceil(box.shape[1] / shift_size))):
+                for ix in range(int(math.ceil(box.shape[0] / shift_size))):
+                    x_start = ix * shift_size
+                    x_end = min(ix * shift_size + crop_size, box.shape[0])
+                    y_start = iy * shift_size
+                    y_end = min(iy * shift_size + crop_size, box.shape[1])
+                    z_start = iz * shift_size
+                    z_end = min(iz * shift_size + crop_size, box.shape[2])
+                    if x_end - x_start <= overlap or y_end - y_start <= overlap or z_end - z_start <= overlap:
+                        continue
                     box_ranges.append([x_start, x_end, y_start, y_end, z_start, z_end])
 
         box_parts = []
@@ -255,11 +258,22 @@ class Model3d():
         )
 
         result_box = np.zeros(box.shape, dtype=np.uint8)
+        half = int(overlap / 2)
         for part, [x1, x2, y1, y2, z1, z2] in zip(result_parts, box_ranges):
-            x_range = x2 - x1
-            y_range = y2 - y1
-            z_range = z2 - z1
-            result_box[x1:x2, y1:y2, z1:z2, :] = part[0:x_range, 0:y_range, 0:z_range, :]
+            bx_start = x1 if x1 == 0            else x1 + half
+            bx_end   = x2 if x2 == box.shape[0] else x2 - half
+            by_start = y1 if y1 == 0            else y1 + half
+            by_end   = y2 if y2 == box.shape[1] else y2 - half
+            bz_start = z1 if z1 == 0            else z1 + half
+            bz_end   = z2 if z2 == box.shape[2] else z2 - half
+            px_start = 0       if x1 == 0            else half
+            px_end   = x2 - x1 if x2 == box.shape[0] else x2 - x1 - half
+            py_start = 0       if y1 == 0            else half
+            py_end   = y2 - y1 if y2 == box.shape[1] else y2 - y1 - half
+            pz_start = 0       if z1 == 0            else half
+            pz_end   = z2 - z1 if z2 == box.shape[2] else z2 - z1 - half
+            result_box[bx_start:bx_end, by_start:by_end, bz_start:bz_end, :]  \
+                = part[px_start:px_end, py_start:py_end, pz_start:pz_end, :]
 
         return result_box
 
