@@ -5,6 +5,7 @@ import glob
 import numpy as np
 from PIL import Image
 
+
 class Dataset2d:
     """ Dataset Class
 
@@ -14,11 +15,10 @@ class Dataset2d:
         number of class labels
 
     """
-    
+
     def __init__(self, classes=1):
         self.classes = classes
 
-        
     def image_read(self, file_path, width, height, feed=True):
         """Read tiff images
 
@@ -47,9 +47,9 @@ class Dataset2d:
         -------
         volume : np.array, shape = (width, height, channels, len(filenames))
             image stack
-        
+
         """
-        
+
         filenames = [img for img in glob.glob(file_path)]
         filenames.sort()
         temp = pylab.imread(filenames[0])
@@ -65,27 +65,26 @@ class Dataset2d:
             d, w, c = temp.shape
             volume = np.zeros((w, d, c, h), dtype=np.uint8)
             channel = 3
-        
-        k=0
-        for img in filenames: #assuming tif     
-            im=pylab.imread(img)
+
+        k = 0
+        for img in filenames:  # assuming tif
+            im = pylab.imread(img)
             if channel == 1:
                 #assert im.shape == (width, height), 'Image with an unexpected size'
-                volume[:,:,k] = im[:w, :d]
+                volume[:, :, k] = im[:w, :d]
             elif channel == 3:
                 #assert im.shape == (width, height, 3), 'Image with an unexpected size'
-                volume[:,:,:,k] = im[:w, :d, :]
-            k+=1
+                volume[:, :, :, k] = im[:w, :d, :]
+            k += 1
 
         # rollaxis change for Keras
         if feed:
             if channel == 1:
                 volume = np.rollaxis(volume, axis=2, start=0)
-            else :
+            else:
                 volume = np.rollaxis(volume, axis=3, start=0)
         return volume
 
-    
     def load_csv(self, csvPath):
         """Load setting csv file
 
@@ -97,14 +96,13 @@ class Dataset2d:
         Returns
         -------
         width, height and number of images
-        
+
         """
-        
+
         with open(csvPath) as f:
             lines = [s.strip() for s in f.readlines()]
         return int(lines[2]), int(lines[3]), int(lines[1])
 
-    
     def color_threshold(self, img, th_value=0):
         """Load setting csv file
 
@@ -119,23 +117,23 @@ class Dataset2d:
         -------
         volume : np.array shape = (width, height, num)
             binary image stack, the value of each pixel is 0 or 255
-        
+
         """
 
         weights = np.c_[0.2989, 0.5870, 0.1140]
-        
+
         if len(img.shape) == 3:
             tile = np.tile(weights, reps=(img.shape[0], img.shape[1], 1))
             return (np.sum(tile * img, axis=2) > th_value) * 255
-        
+
         else:
             volume = np.zeros((img.shape[0], img.shape[1], img.shape[3]), dtype=np.uint8)
             for k in range(img.shape[3]):
-                im = img[:,:,:,k]
+                im = img[:, :, :, k]
                 tile = np.tile(weights, reps=(im.shape[0], im.shape[1], 1))
-                volume[:,:,k] = (np.sum(tile * im, axis=2) > th_value) * 255
+                volume[:, :, k] = (np.sum(tile * im, axis=2) > th_value) * 255
             return volume
-        
+
     def add_rotdata(self, X, Y):
         X90 = np.zeros(X.shape, dtype=np.float32)
         Y90 = np.zeros(Y.shape, dtype=np.float32)
@@ -143,17 +141,16 @@ class Dataset2d:
         Y180 = np.zeros(Y.shape, dtype=np.float32)
         X270 = np.zeros(X.shape, dtype=np.float32)
         Y270 = np.zeros(Y.shape, dtype=np.float32)
-        
+
         for k in range(X.shape[0]):
-            X90[k,:,:] = np.rot90(X[k])
-            Y90[k,:,:] = np.rot90(Y[k])
-            X180[k,:,:] = np.rot90(X[k], 2)
-            Y180[k,:,:] = np.rot90(Y[k], 2)
-            X270[k,:,:] = np.rot90(X[k], 3)
-            Y270[k,:,:] = np.rot90(Y[k], 3)
+            X90[k, :, :] = np.rot90(X[k])
+            Y90[k, :, :] = np.rot90(Y[k])
+            X180[k, :, :] = np.rot90(X[k], 2)
+            Y180[k, :, :] = np.rot90(Y[k], 2)
+            X270[k, :, :] = np.rot90(X[k], 3)
+            Y270[k, :, :] = np.rot90(Y[k], 3)
         return np.concatenate([X, X90, X180, X270]), np.concatenate([Y, Y90, Y180, Y270])
 
-    
     def image_save(self, image, fname):
         """Save image stack as TIFF files
 
@@ -163,10 +160,10 @@ class Dataset2d:
             image stack
         fname : str
             filename path of output
-        
+
         """
         for k in range(image.shape[2]):
             n = ('000' + str(k))[-4:]
-            Image.fromarray(image[:,:,k]).save(fname + n + '.tif')
+            Image.fromarray(image[:, :, k]).save(fname + n + '.tif')
 
         return fname + n + '.tif'

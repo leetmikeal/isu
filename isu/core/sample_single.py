@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 import glob
-import os
 import math
+import os
 import sys
 
 import cv2
@@ -42,7 +42,6 @@ class SampleSingle():
 
         image_raw = self.__load_image(self.image_dir_path)
         self.image = image_raw
-
 
     def debug_print(self):
         return
@@ -106,7 +105,6 @@ class SampleSingle():
 
         return boxcell
 
-
     def __load_csv(self, path):
         with open(path, 'r') as f:
             name = f.readline().strip('\n')
@@ -116,11 +114,9 @@ class SampleSingle():
 
         return name, z, x, y
 
-
     def __generate_file_name(self, name, z_count):
         for i in range(z_count):
             yield '{}_input_{:04d}.tif'.format(name, i)
-
 
     def __load_single_image_from_file(self, path):
         img = cv2.imread(path, cv2.IMREAD_GRAYSCALE)

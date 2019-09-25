@@ -109,9 +109,9 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
     nparray = nparray[
         0,
         0,
-        padding_position[0]:padding_position[0]+input_shape[0],
-        padding_position[1]:padding_position[1]+input_shape[1],
-        padding_position[2]:padding_position[2]+input_shape[2],
+        padding_position[0]:padding_position[0] + input_shape[0],
+        padding_position[1]:padding_position[1] + input_shape[1],
+        padding_position[2]:padding_position[2] + input_shape[2],
         0
     ]
 

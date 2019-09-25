@@ -32,6 +32,7 @@ def register_training_2d(parser):
     setup_argument_parser(parser)
     parser.set_defaults(handler=command_training_2d)
 
+
 def register_predict_2d(parser):
     from predict_2d import setup_argument_parser
 
@@ -42,6 +43,7 @@ def register_predict_2d(parser):
     setup_argument_parser(parser)
     parser.set_defaults(handler=command_predict_2d)
 
+
 def register_training_3d(parser):
     from training_3d import setup_argument_parser
 
@@ -51,6 +53,7 @@ def register_training_3d(parser):
 
     setup_argument_parser(parser)
     parser.set_defaults(handler=command_training_3d)
+
 
 def register_predict_3d(parser):
     from predict_3d import setup_argument_parser
