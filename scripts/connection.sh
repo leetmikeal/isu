@@ -14,9 +14,10 @@ alcon12
 
 for L in ${LABELS[@]}; do
     echo ${L}
-    isu analyze ensemble \
-        --in-dir1 work/temp/2d/${L} \
-        --in-dir2 work/temp/3d/${L} \
-        --out-dir work/temp/ensemble/${L} \
+    isu analyze connection \
+        --in-dir work/temp/ensemble/${L} \
+        --out-dir work/output/${L} \
+        --in-filename *.tif \
+        --stat work/output/${L}_stat.log \
         --verbose
 done

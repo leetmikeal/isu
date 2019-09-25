@@ -23,10 +23,10 @@ def analyze_pxcm(in_dir1, in_dir2, out_csv, verbose):
     elif not os.path.exists(in_dir2):
         raise ValueError('input directory was not found. | {}'.format(in_dir2))
 
-    boxcelll = load_image(in_dir1)
-    boxcell2 = load_image(in_dir2)
+    box1 = load_box(in_dir1)
+    box2 = load_box(in_dir2)
 
-    tp, fp, fn, tn = count_pixel_confusion_matrix(boxcelll, boxcell2)
+    tp, fp, fn, tn = count_pixel_confusion_matrix(box1, box2)
 
     matrix = [[tp, fp], [fn, tn]]
 
@@ -57,7 +57,7 @@ def count_pixel_confusion_matrix(box1, box2):
 
 
 
-def load_image(path, verbose=False):
+def load_box(path, verbose=False):
     if verbose:
         print('image loading. | {}'.format(path))
     
