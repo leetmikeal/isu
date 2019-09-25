@@ -31,6 +31,7 @@ class Config():
         # parameter
         self.predict_2d_batch_size = config.getint('ML', 'PREDICT_2D_BATCH_SIZE')
         self.predict_3d_batch_size = config.getint('ML', 'PREDICT_3D_BATCH_SIZE')
+        self.predict_3d_crop_size = config.getint('ML', 'PREDICT_3D_CROP_SIZE')
         self.ke_init = 'he_normal'
 
     def __to_abs_path(self, path):

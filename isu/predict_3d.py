@@ -38,6 +38,7 @@ def predict(
         model_path,
         out_dir,
         batch_size,
+        crop_size,
         application,
         verbose=False):
     """training and validation
@@ -45,7 +46,7 @@ def predict(
     Args:
         sample_dir (string): sample directory path
         out_dir (string): output result saving directory path
-        bach_size (int): image batch size per epoch
+        crop_size (int): box predict iteration crop size
         application (string): model structure [isensee2017, unet]
         verbose (boolean): output debug information
     """
@@ -79,8 +80,9 @@ def predict(
     # create model
     model = Model3d.from_file(
         path=model_path,
-        batch_size=1,
-        input_shape=sample.input_shape(),
+        batch_size=batch_size,
+        # input_shape=sample.input_shape(),
+        input_shape=(crop_size, crop_size, crop_size, 1),
         verbose=verbose
     )
 
@@ -89,8 +91,9 @@ def predict(
     #     model.save_plot_model(os.path.join(out_dir, 'model.png'))
 
     # training
-    input_sample = np.array([sample.image])
-    result = model.predict(input_sample, out_dir)
+    # input_sample = np.array([sample.image])
+    # result = model.predict(input_sample, out_dir)
+    result = model.predict_crop(sample.image, out_dir, crop_size)
 
     # # save model
     # result.save(out_dir)
@@ -103,12 +106,9 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
     print('result saving...')
     print('shape : {}'.format(nparray.shape))
 
-    base_path = os.path.join(dir_path, 'result_images')
-    os.makedirs(base_path, exist_ok=True)
+    os.makedirs(dir_path, exist_ok=True)
 
     nparray = nparray[
-        0,
-        0,
         padding_position[0]:padding_position[0] + input_shape[0],
         padding_position[1]:padding_position[1] + input_shape[1],
         padding_position[2]:padding_position[2] + input_shape[2],
@@ -120,7 +120,7 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
         saved_img = np.zeros(img.shape, dtype=np.uint8)
         saved_img[img > 0.5] = 255
 
-        saving_path = os.path.join(base_path, '{:04d}.tif'.format(iz))
+        saving_path = os.path.join(dir_path, '{:04d}.tif'.format(iz))
         cv2.imwrite(saving_path, saved_img)
 
 
@@ -129,14 +129,16 @@ def main(args):
     config.init(args.dataset)
     sample_dir = config.input_path
     model_path = config.model_3d_path
-    out_dir = config.output_path
+    out_dir = config.temp_3d_dir
     batch_size = config.predict_3d_batch_size
+    crop_size = config.predict_3d_crop_size
 
     predict(
         sample_dir=sample_dir,
         model_path=model_path,
         out_dir=out_dir,
         batch_size=batch_size,
+        crop_size=crop_size,
         application=args.application,
         verbose=args.verbose
     )

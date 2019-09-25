@@ -2,8 +2,10 @@
 import glob
 import os
 import sys
+import math
 
 import keras
+import numpy as np
 
 # adding current dir to lib path
 mydir = os.path.dirname(os.path.dirname(__file__))
@@ -216,6 +218,55 @@ class Model3d():
             verbose=self.verbose
         )
         return result
+
+    def predict_crop(self, box, out_dir, crop_size):
+
+        box_ranges = []
+        for iz in range(int(math.ceil(box.shape[2] / crop_size))):
+            for iy in range(int(math.ceil(box.shape[1] / crop_size))):
+                for ix in range(int(math.ceil(box.shape[0] / crop_size))):
+                    x_start = ix * crop_size
+                    x_end = min((ix + 1) * crop_size, box.shape[0])
+                    y_start = iy * crop_size
+                    y_end = min((iy + 1) * crop_size, box.shape[1])
+                    z_start = iz * crop_size
+                    z_end = min((iz + 1) * crop_size, box.shape[2])
+                    box_ranges.append([x_start, x_end, y_start, y_end, z_start, z_end])
+
+        box_parts = []
+        for x1, x2, y1, y2, z1, z2 in box_ranges:
+            part = box[x1:x2, y1:y2, z1:z2, :]
+            x_pad = (0, crop_size - (x2 - x1))
+            y_pad = (0, crop_size - (y2 - y1))
+            z_pad = (0, crop_size - (z2 - z1))
+            part = np.pad(part, (x_pad, y_pad, z_pad, (0, 0)), mode='edge')
+            box_parts.append(part)
+        box_parts = np.array(box_parts)
+
+
+        from model.model_action import predict as model_predict
+
+        result_parts = model_predict(
+            self.model,
+            box_parts,
+            result_dir_path=out_dir,
+            batch_size=self.batch_size,
+            verbose=self.verbose
+        )
+
+        result_box = np.zeros(box.shape, dtype=np.uint8)
+        for part, [x1, x2, y1, y2, z1, z2] in zip(result_parts, box_ranges):
+            x_range = x2 - x1
+            y_range = y2 - y1
+            z_range = z2 - z1
+            result_box[x1:x2, y1:y2, z1:z2, :] = part[0:x_range, 0:y_range, 0:z_range, :]
+
+        return result_box
+
+
+
+
+
 
     def save(self, out_dir):
         save_model_path = os.path.join(out_dir, 'trained.json')

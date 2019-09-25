@@ -209,11 +209,12 @@ def predict(
 
     pred_list = []
     for j, image_batch in enumerate(predict_generator):
-        pred = model.predict_on_batch(image_batch)
+        arr = np.array(image_batch)
+        pred = model.predict_on_batch(arr)
         pred_list.append(pred)
 
     # 実際の予測結果
-    pred = np.array(pred_list)
+    pred = np.concatenate(pred_list, axis=0)
     # np.save(result_path, pred)
 
     return pred
