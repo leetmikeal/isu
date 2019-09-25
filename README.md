@@ -36,7 +36,13 @@ Next, install this repository package.
 pip install -e .
 ```
 
-Then, you can use `isu` command.
+or 
+
+```
+pip install -r requirements.txt
+```
+
+Then, you can use `isu` command or `python isu/isu.py`.
 
 
 ## to use `analyze connection`
