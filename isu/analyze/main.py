@@ -48,6 +48,18 @@ def setup_argument_parser(parser):
     setup_argument_parser(parser_ensemble)
     parser_ensemble.set_defaults(handler=command_ensemble)
 
+    # threshold
+    def command_threshold(args):
+        from threshold import main
+        main(args)
+
+    parser_threshold = subparsers.add_parser(
+        'threshold', help='see `-h`')
+    from threshold import setup_argument_parser
+    # subcommand
+    setup_argument_parser(parser_threshold)
+    parser_threshold.set_defaults(handler=command_threshold)
+
 
 if __name__ == '__main__':
     # setup
