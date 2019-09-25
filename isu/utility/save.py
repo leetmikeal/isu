@@ -12,8 +12,7 @@ def check_dir(path):
         path (string): checking directory path
     """
     dirpath = os.path.dirname(path)
-    if not os.path.exists(dirpath):
-        os.makedirs(dirpath)
+    os.makedirs(dirpath, exist_ok=True)
 
 
 def save(save_dir, data, index, num):

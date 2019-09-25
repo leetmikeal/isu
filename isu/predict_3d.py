@@ -72,8 +72,7 @@ def predict(
     #     val_biased=True
     # )
 
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
 
     # # learning rate
     # lr = LearningRateSchedulerConf(
@@ -110,8 +109,7 @@ def save_slice_result(nparray, padding_position, input_shape, dir_path):
     print('shape : {}'.format(nparray.shape))
 
     base_path = os.path.join(dir_path, 'result_images')
-    if not os.path.exists(base_path):
-        os.makedirs(base_path)
+    os.makedirs(base_path, exist_ok=True)
 
     nparray = nparray[
         0,

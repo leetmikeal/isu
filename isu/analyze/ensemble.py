@@ -28,8 +28,7 @@ def analyze_ensemble(in_dir1, in_dir2, out_dir, verbose):
     
     fpath1 = os.path.join(in_dir1, '*.tif')
     fpath2 = os.path.join(in_dir2, '*.tif')
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
     
     volume1 = image_read(fpath1)
     volume2 = image_read(fpath2)

@@ -31,7 +31,8 @@ def setup_argument_parser(parser):
 
 def predict(in_settings, verbose=False):
     config = Config(in_settings)
-    unet = Model2d(settings)   
+    model_base = Model2d(config)   
+    model = model_base.load()
     ds = Dataset2d()
     
     width, height, imgnum = ds.load_csv(config.csv_path)
@@ -42,8 +43,10 @@ def predict(in_settings, verbose=False):
     X_train_norm = X_train_norm.reshape(-1, config.max_size, config.max_size, 1)
     print('X_train_norm:', X_train_norm.shape)
     
-    model = keras.models.load_model(config.model_name, custom_objects={'loss': config.soft_dice_loss()})
-    print(model.summary())
+    # model = keras.models.load_model(config.model_2d_path, custom_objects={'loss': unet.soft_dice_loss()})
+
+    if verbose:
+        print(model.summary())
     
     Y_pred = model.predict(X_train_norm, batch_size=config.predict_batch_size, verbose=0)
     Y_pred_bin = np.copy(Y_pred)
@@ -53,14 +56,15 @@ def predict(in_settings, verbose=False):
     Y_pred_bin = Y_pred_bin[:, :mwidth, :mheight]
     output = np.rollaxis(Y_pred_bin, axis=0, start=3)
 
-    if not os.path.exists(config.temp2d_path):
-        if not os.path.exists(config.temp_dir):
-            os.mkdir(config.temp_dir)
-        os.mkdir(config.temp2d_path)
-    if not os.path.exists(config.pre_path):
-        os.mkdir(config.pre_path)
-    outPath = config.pre_path + '/' + config.dataset + '_temp_'
-    ds.image_save(output, outPath)
+    # if not os.path.exists(config.temp2d_path):
+    #     if not os.path.exists(config.temp_dir):
+    #         os.mkdir(config.temp_dir)
+    #     os.mkdir(config.temp2d_path)
+    # if not os.path.exists(config.pre_path):
+    #     os.mkdir(config.pre_path)
+    # outPath = config.pre_path + '/' + config.dataset + '_temp_'
+    os.makedirs(config.temp_dir, exist_ok=True)
+    ds.image_save(output, config.temp_dir)
     
 def main(args):
     predict(

@@ -17,9 +17,7 @@ def ensure_exist_save_dir(path):
     '''
     dirpath = os.path.dirname(path)
     abs_dirpath = os.path.abspath(dirpath)
-    if not os.path.exists(abs_dirpath):
-        os.makedirs(abs_dirpath)
-
+    os.makedirs(abs_dirpath, exist_ok=True)
 
 def generate_common_model(save_model_path, save_image_path=None):  # 以後一番いじられるところ
     '''

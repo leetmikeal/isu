@@ -22,8 +22,7 @@ def setup_argument_parser(parser):
 def analyze_connection(in_dir, out_dir, in_filename='0000.tif', verbose=False):
     # unet = UNet(inifile='setting.ini')
     # ds = dataset.Dataset()
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
 
     # for windows
     fiji_path = os.getenv('FIJI_PATH', r'C:\Users\tamaki\Downloads\fiji-win64\Fiji.app')

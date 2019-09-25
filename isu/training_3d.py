@@ -143,8 +143,7 @@ def training(
         val_biased=True
     )
 
-    if not os.path.exists(out_dir):
-        os.makedirs(out_dir)
+    os.makedirs(out_dir, exist_ok=True)
 
     # learning rate
     lr = LearningRateSchedulerConf(
