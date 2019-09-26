@@ -60,6 +60,18 @@ def setup_argument_parser(parser):
     setup_argument_parser(parser_threshold)
     parser_threshold.set_defaults(handler=command_threshold)
 
+    # collision
+    def command_collision(args):
+        from collision import main
+        main(args)
+
+    parser_collision = subparsers.add_parser(
+        'collision', help='see `-h`')
+    from collision import setup_argument_parser
+    # subcommand
+    setup_argument_parser(parser_collision)
+    parser_collision.set_defaults(handler=command_collision)
+
 
 if __name__ == '__main__':
     # setup
