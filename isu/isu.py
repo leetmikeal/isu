@@ -22,16 +22,6 @@ mydir = os.path.dirname(__file__)
 sys.path.insert(0, mydir)
 
 
-def register_training_2d(parser):
-    from training_2d import setup_argument_parser
-
-    def command_training_2d(args):
-        from training_2d import main
-        main(args)
-
-    setup_argument_parser(parser)
-    parser.set_defaults(handler=command_training_2d)
-
 
 def register_predict_2d(parser):
     from predict_2d import setup_argument_parser
@@ -42,17 +32,6 @@ def register_predict_2d(parser):
 
     setup_argument_parser(parser)
     parser.set_defaults(handler=command_predict_2d)
-
-
-def register_training_3d(parser):
-    from training_3d import setup_argument_parser
-
-    def command_training_3d(args):
-        from training_3d import main
-        main(args)
-
-    setup_argument_parser(parser)
-    parser.set_defaults(handler=command_training_3d)
 
 
 def register_predict_3d(parser):
@@ -78,17 +57,9 @@ def main():
     parser.add_argument('--version', action='version', version='%(prog)s ' + version)
     subparsers = parser.add_subparsers()
 
-    # training_2d
-    parser_training_2d = subparsers.add_parser('training-2d', help='see `-h`')
-    register_training_2d(parser_training_2d)
-
     # predict_2d
     parser_predict_2d = subparsers.add_parser('predict-2d', help='see `-h`')
     register_predict_2d(parser_predict_2d)
-
-    # training_3d
-    parser_training_3d = subparsers.add_parser('training-3d', help='see `-h`')
-    register_training_3d(parser_training_3d)
 
     # predict_3d
     parser_predict_3d = subparsers.add_parser('predict-3d', help='see `-h`')
