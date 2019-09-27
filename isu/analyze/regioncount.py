@@ -78,16 +78,22 @@ def count_collision(voxel, verbose=False):
     n_region = flat.max()
     result = []
     for segid in tqdm(range(1, n_region + 1), disable=(not verbose)):
-        count = np.sum(flat == segid)
+        count = np.count_nonzero(flat == segid)
         result.append([segid, count])
 
     return result
 
 
 def save_result(result, path):
-    df = pd.DataFrame(result, columns=['index', 'volume'])
-    df.sort_values('volume', ascending=False)
-    df.to_csv(path, index_col=0)
+    np_result = np.array(result)
+    data = np_result[:, 1:]
+    index = np_result[:, 0]
+    print('data : {}'.format(data.shape))
+    print('index : {}'.format(index.shape))
+    df = pd.DataFrame(data, index=index, columns=['volume'])
+    df.sort_values('volume', ascending=False, inplace=True)
+    df.index
+    df.to_csv(path)
 
 
 
