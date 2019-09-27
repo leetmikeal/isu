@@ -72,6 +72,18 @@ def setup_argument_parser(parser):
     setup_argument_parser(parser_collision)
     parser_collision.set_defaults(handler=command_collision)
 
+    # regioncount
+    def command_regioncount(args):
+        from regioncount import main
+        main(args)
+
+    parser_regioncount = subparsers.add_parser(
+        'regioncount', help='see `-h`')
+    from regioncount import setup_argument_parser
+    # subcommand
+    setup_argument_parser(parser_regioncount)
+    parser_regioncount.set_defaults(handler=command_regioncount)
+
 
 if __name__ == '__main__':
     # setup
