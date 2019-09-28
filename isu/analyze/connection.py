@@ -25,7 +25,7 @@ def setup_argument_parser(parser):
     # parser.add_argument('--in-dir', help='image contained directory path', required=True)
     # parser.add_argument('--out-dir', help='path', required=True)
     parser.add_argument('--in-filename', help='filename', default='*.tif')
-    parser.add_argument('--connectivity', help='neighbor search area in 3d box. [26, 18, 6]', type=int, default=6)
+    parser.add_argument('--connectivity', help='neighbor search area in 3d box. [26, 18, 6]', type=int, default=0)
     parser.add_argument('--stat', help='statistics information saving file path')
     parser.add_argument('--verbose', help='output process detail', action='store_true')
 
@@ -173,6 +173,8 @@ def pickup_byte2(img32, channel):
 def main(args):
     config = Config(args.in_settings)
     config.init(args.dataset)
+    if args.connectivity != 0:
+        config.ensemble_connectivity = args.connectivity
     if args.verbose:
         config.debug()
 
