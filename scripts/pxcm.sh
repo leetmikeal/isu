@@ -13,6 +13,8 @@ MASTER=work/label
 #TARGET=work/output_2d/temp2d
 #TARGET=work/temp/ensemble
 TARGET=work/output
+#TARGET=work/temp/2d
+# TARGET=work/temp/3d
 
 for L in ${LABELS[@]}; do
     echo ${L}
