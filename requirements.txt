@@ -23,7 +23,7 @@ termcolor==1.1.0
 tqdm==4.35.0
 Werkzeug==0.15.6
 wrapt==1.11.2
-opencv-python==4.1.1.26
+opencv-python==4.2.0.32
 matplotlib==3.1.1
 scikit-image==0.15.0
 connected-components-3d
